@@ -60,7 +60,9 @@ export const addEditAdminProfile = async (req, res) => {
           responseMessage.ADMIN_ALREADY_EXISTS
         );
 
-      result = await DeveloperAdmin.findByIdAndUpdate(id, payload, { new: true });
+      result = await DeveloperAdmin.findByIdAndUpdate(id, payload, {
+        new: true,
+      });
       return ResponseHandler(
         res,
         StatusCodes.OK,
