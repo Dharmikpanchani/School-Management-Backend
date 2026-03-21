@@ -8,6 +8,11 @@
 # REGION: Auth & Profile Management
 # -------------------------------------------------------
 
+# 0. REGISTER
+curl -X POST {{URL}}/api/developer/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Developer Name","email":"developer@example.com","phoneNumber":"9876543210","password":"Password@123","address":"Surat, Gujarat"}'
+
 # 1. LOGIN
 curl -X POST {{URL}}/api/developer/login \
   -H "Content-Type: application/json" \
