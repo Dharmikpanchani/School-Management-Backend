@@ -92,8 +92,8 @@ developerRoutes.patch(
 //#region Admin CRUD Management
 developerRoutes.post(
   '/add-edit-admin',
-  // developerAuth,
-  // checkPermission(developerRolePermissionList.admin_users.create),
+  developerAuth,
+  checkPermission(developerRolePermissionList.admin_users.create),
   DeveloperAdminController.addEditAdminProfile
 );
 
