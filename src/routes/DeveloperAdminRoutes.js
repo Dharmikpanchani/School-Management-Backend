@@ -7,7 +7,7 @@ import * as DeveloperRolePermissionController from '../controller/developerAdmin
 import { developerAuth, refreshTokenAuth } from '../middleware/Auth.js';
 import { checkPermission, checkRoleInUse } from '../middleware/Rbac.js';
 import { developerRolePermissionList } from '../utils/RolePermissionList.js';
-import { authLimiter } from '../middleware/AuthLimiter.js';
+import { authLimiter } from '../middleware/RateLimit.js';
 import MediaUpload from '../middleware/MediaUpload.js';
 
 const developerRoutes = Router();
