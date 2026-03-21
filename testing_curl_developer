@@ -1,0 +1,193 @@
+
+# ============================================================
+# BASE URL   : {{URL}}
+# PREFIX     : /api/developer
+# ============================================================
+
+# -------------------------------------------------------
+# REGION: Auth & Profile Management
+# -------------------------------------------------------
+
+# 1. LOGIN
+curl -X POST {{URL}}/api/developer/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@example.com","password":"Password@123"}'
+
+# 2. REFRESH TOKEN (uses HttpOnly cookie set at login)
+curl -X POST {{URL}}/api/developer/refresh-token \
+  --cookie "refreshToken=YOUR_REFRESH_TOKEN"
+
+# 3. LOGOUT
+curl -X POST {{URL}}/api/developer/logout \
+  --cookie "refreshToken=YOUR_REFRESH_TOKEN"
+
+# 4. VERIFY REGISTRATION OTP
+curl -X POST {{URL}}/api/developer/verify-registration-otp \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@example.com","otp":"123456"}'
+
+# 5. RESEND REGISTRATION OTP
+curl -X POST {{URL}}/api/developer/re-send-otp \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@example.com"}'
+
+# 6. FORGOT PASSWORD
+curl -X POST {{URL}}/api/developer/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@example.com"}'
+
+# 7. VERIFY FORGOT PASSWORD OTP
+curl -X POST {{URL}}/api/developer/verify-otp \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@example.com","otp":"123456"}'
+
+# 8. RESEND FORGOT PASSWORD OTP
+curl -X POST {{URL}}/api/developer/resend-forgot-otp \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@example.com"}'
+
+# 9. RESET PASSWORD
+curl -X POST {{URL}}/api/developer/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@example.com","newPassword":"NewPassword@123","confirmPassword":"NewPassword@123"}'
+
+# 10. CHANGE PASSWORD (Requires Auth)
+curl -X POST {{URL}}/api/developer/change-password \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -d '{"oldPassword":"Password@123","newPassword":"NewPassword@123","confirmPassword":"NewPassword@123"}'
+
+# 11. GET PROFILE (Requires Auth)
+curl -X GET {{URL}}/api/developer/profile \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 12. UPDATE PROFILE (Requires Auth, supports multipart for image upload)
+curl -X PATCH {{URL}}/api/developer/update-profile \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -F "name=Developer Name" \
+  -F "email=developer@example.com" \
+  -F "phoneNumber=9876543210" \
+  -F "address=Surat, Gujarat" \
+  -F "imageUrl=@/path/to/profile.jpg"
+
+
+# -------------------------------------------------------
+# REGION: Admin (SchoolAdmin) CRUD Management
+# -------------------------------------------------------
+
+# 13. ADD / EDIT SCHOOL ADMIN (id=blank means Create, id=existing means Update)
+# CREATE new admin
+curl -X POST {{URL}}/api/developer/add-edit-admin \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -d '{
+    "name": "Admin Name",
+    "email": "admin@school.com",
+    "password": "Password@123",
+    "schoolId": "SCHOOL_OBJECT_ID",
+    "role": "ROLE_OBJECT_ID",
+    "address": "Surat"
+  }'
+
+# EDIT existing admin (pass id field)
+curl -X POST {{URL}}/api/developer/add-edit-admin \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -d '{
+    "id": "ADMIN_OBJECT_ID",
+    "name": "Updated Admin Name",
+    "email": "admin_updated@school.com",
+    "schoolId": "SCHOOL_OBJECT_ID"
+  }'
+
+# 14. GET ALL ADMINS (Requires Auth, supports pagination & search)
+curl -X GET "{{URL}}/api/developer/get-all-admins?pageNumber=1&perPageData=10&searchRequest=admin" \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 15. DELETE ADMIN (Soft Delete)
+curl -X DELETE {{URL}}/api/developer/delete-admin/ADMIN_OBJECT_ID \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 16. TOGGLE ADMIN STATUS (Active/Inactive)
+curl -X POST {{URL}}/api/developer/admin-action-status/ADMIN_OBJECT_ID \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+
+# -------------------------------------------------------
+# REGION: Role Management
+# -------------------------------------------------------
+
+# 17. ADD / EDIT ROLE
+# CREATE new role
+curl -X POST {{URL}}/api/developer/add-edit-role \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -d '{
+    "role": "manager",
+    "permissions": ["admin_users.create", "admin_users.read", "roles.read"]
+  }'
+
+# EDIT existing role (pass id field)
+curl -X POST {{URL}}/api/developer/add-edit-role \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -d '{
+    "id": "ROLE_OBJECT_ID",
+    "role": "senior_manager",
+    "permissions": ["admin_users.create", "admin_users.read", "admin_users.delete", "roles.read"]
+  }'
+
+# 18. GET ALL ROLES (supports pagination & search)
+curl -X GET "{{URL}}/api/developer/get-all-roles?pageNumber=1&perPageData=10&searchRequest=manager" \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 19. GET ROLE BY ID
+curl -X GET {{URL}}/api/developer/get-role/ROLE_OBJECT_ID \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 20. DELETE ROLE (Soft Delete)
+curl -X DELETE {{URL}}/api/developer/delete-role/ROLE_OBJECT_ID \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 21. TOGGLE ROLE STATUS (Active/Inactive)
+curl -X POST {{URL}}/api/developer/role-action-status/ROLE_OBJECT_ID \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+
+# -------------------------------------------------------
+# REGION: Sales Management
+# -------------------------------------------------------
+
+# 22. ADD / UPDATE SALES PROFILE
+# CREATE new sales
+curl -X POST {{URL}}/api/developer/add-update-sales \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -d '{
+    "email": "sales@example.com",
+    "number": "9876543210",
+    "upiId": "sales@upi"
+  }'
+
+# UPDATE existing sales (pass id field)
+curl -X POST {{URL}}/api/developer/add-update-sales \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{TOKEN}}" \
+  -d '{
+    "id": "SALES_OBJECT_ID",
+    "email": "sales_updated@example.com",
+    "number": "9988776655",
+    "upiId": "sales_updated@upi"
+  }'
+
+# 23. GET ALL SALES (with populated school data)
+curl -X GET {{URL}}/api/developer/get-all-sales \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 24. GET SALES BY ID (with populated school data)
+curl -X GET {{URL}}/api/developer/get-sales/SALES_OBJECT_ID \
+  -H "Authorization: Bearer {{TOKEN}}"
+
+# 25. DELETE SALES
+curl -X DELETE {{URL}}/api/developer/delete-sales/SALES_OBJECT_ID \
+  -H "Authorization: Bearer {{TOKEN}}"

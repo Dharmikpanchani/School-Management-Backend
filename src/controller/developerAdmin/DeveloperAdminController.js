@@ -1,4 +1,4 @@
-import SchoolAdmin from '../../models/schoolAdmin/SchoolAdmin.js';
+import DeveloperAdmin from '../../models/developerAdmin/DeveloperAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import {
   ResponseHandler,
@@ -20,15 +20,13 @@ const logger = new Logger(
   './src/controller/developerAdmin/DeveloperAdminController.js'
 );
 
-//#region ➕ Add / ✏️ Edit SchoolAdmin Profile
+//#region ➕ Add / ✏️ Edit DeveloperAdmin Profile
 export const addEditAdminProfile = async (req, res) => {
   try {
-    const { id, name, email, password, role, schoolId, address } = req.body;
+    const { id, name, email, password, role, address } = req.body;
 
     // DeveloperAdmin assigns schoolId explicitly
-    const assignedSchoolId = schoolId;
-
-    const payload = { name, email, schoolId: assignedSchoolId, address };
+    const payload = { name, email, address };
 
     if (password) {
       payload.password = await encryptPassword(password);
@@ -39,7 +37,7 @@ export const addEditAdminProfile = async (req, res) => {
 
     let result;
     if (id) {
-      const existingAdmin = await SchoolAdmin.findOne({
+      const existingAdmin = await DeveloperAdmin.findOne({
         _id: id,
         isDeleted: false,
       });
@@ -50,7 +48,7 @@ export const addEditAdminProfile = async (req, res) => {
           responseMessage.ADMIN_NOT_FOUND
         );
 
-      const duplicateAdmin = await SchoolAdmin.findOne({
+      const duplicateAdmin = await DeveloperAdmin.findOne({
         _id: { $ne: id },
         $or: [{ email }],
         isDeleted: false,
@@ -62,7 +60,7 @@ export const addEditAdminProfile = async (req, res) => {
           responseMessage.ADMIN_ALREADY_EXISTS
         );
 
-      result = await SchoolAdmin.findByIdAndUpdate(id, payload, { new: true });
+      result = await DeveloperAdmin.findByIdAndUpdate(id, payload, { new: true });
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -71,7 +69,7 @@ export const addEditAdminProfile = async (req, res) => {
       );
     } else {
       // Create flow
-      const duplicateAdmin = await SchoolAdmin.findOne({
+      const duplicateAdmin = await DeveloperAdmin.findOne({
         email,
         isDeleted: false,
       });
@@ -98,19 +96,19 @@ export const addEditAdminProfile = async (req, res) => {
           rateLimit.message
         );
 
-      // Create Unverified SchoolAdmin
+      // Create Unverified DeveloperAdmin
       payload.isVerified = false;
-      result = await SchoolAdmin.create(payload);
+      result = await DeveloperAdmin.create(payload);
 
       // Send OTP
       const otp = generateOtp();
       await storeOtp('admin', email, otp);
       sendRegisterVerificationEmail(
-        `Your SchoolAdmin Register OTP is: ${otp}`,
+        `Your DeveloperAdmin Register OTP is: ${otp}`,
         email,
-        'SchoolAdmin'
+        'DeveloperAdmin'
       ).catch((err) =>
-        logger.error(`Error sending SchoolAdmin Registration OTP: ${err}`)
+        logger.error(`Error sending DeveloperAdmin Registration OTP: ${err}`)
       );
 
       return ResponseHandler(
@@ -146,12 +144,12 @@ export const getAllAdmins = async (req, res) => {
       ];
     }
 
-    const totalArrayLength = await SchoolAdmin.countDocuments(query);
+    const totalArrayLength = await DeveloperAdmin.countDocuments(query);
     const page = parseInt(pageNumber);
     const limit = parseInt(perPageData || totalArrayLength);
     const skip = (page - 1) * limit;
 
-    const adminData = await SchoolAdmin.find(query)
+    const adminData = await DeveloperAdmin.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -176,10 +174,10 @@ export const getAllAdmins = async (req, res) => {
 };
 //#endregion
 
-//#region 🗑️ Delete SchoolAdmin (Soft Delete)
+//#region 🗑️ Delete DeveloperAdmin (Soft Delete)
 export const deleteAdmin = async (req, res) => {
   try {
-    const admin = await SchoolAdmin.findOneAndUpdate(
+    const admin = await DeveloperAdmin.findOneAndUpdate(
       { _id: req.params.id, isDeleted: false },
       { isDeleted: true },
       { new: true }
@@ -206,12 +204,12 @@ export const deleteAdmin = async (req, res) => {
 };
 //#endregion
 
-//#region ⚡ SchoolAdmin Status Handler (Toggle Active)
+//#region ⚡ DeveloperAdmin Status Handler (Toggle Active)
 export const adminStatusHandler = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const admin = await SchoolAdmin.findOne({ _id: id, isDeleted: false });
+    const admin = await DeveloperAdmin.findOne({ _id: id, isDeleted: false });
 
     if (!admin) {
       return ResponseHandler(
@@ -221,7 +219,7 @@ export const adminStatusHandler = async (req, res) => {
       );
     }
 
-    const updatedAdmin = await SchoolAdmin.findByIdAndUpdate(
+    const updatedAdmin = await DeveloperAdmin.findByIdAndUpdate(
       id,
       { isActive: !admin.isActive },
       { new: true }

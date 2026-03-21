@@ -33,7 +33,7 @@ export const responseMessage = {
   ADMIN_FETCH_SUCCESS: 'Admin fetch successfully',
   ADMIN_DELETE_SUCCESS: 'Admin delete successfully',
   ADMIN_ALREADY_EXISTS: 'Admin already exists',
-  ADMIN_CREATED: 'Admin created successfully',
+  ADMIN_CREATED: 'OTP has been sent to your registered email.',
 
   PROFILE_NOT_FOUND: 'Profile not found',
   PROFILE_UPDATED: 'Profile updated successfully',
@@ -263,8 +263,8 @@ export const responseMessage = {
   ACCESS_TOKEN_HAS_EXPIRED: 'Access token has expired',
   INVALID_ACCESS_TOKEN: 'Invalid access token',
   ADMIN_ACCOUNT_IS_DISABLED: 'Admin account is disabled',
-  DEVELOPER_NOT_FOUND: 'Developer not found',
-  DEVELOPER_ACCOUNT_IS_DISABLED: 'Developer account is disabled',
+  DEVELOPER_NOT_FOUND: 'Admin user not found',
+  DEVELOPER_ACCOUNT_IS_DISABLED: 'Admin user account is disabled',
   REFRESH_TOKEN_REQUIRED_STRING: 'Refresh token required string',
   INVALID_REFRESH_TOKEN: 'Invalid refresh token',
   REFRESH_TOKEN_HAS_EXPIRED_PLEASE_LOG_IN_:
