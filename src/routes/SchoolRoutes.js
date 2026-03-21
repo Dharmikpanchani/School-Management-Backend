@@ -12,6 +12,7 @@ const adminRoutes = Router();
 // Apply strict rate limiting for auth endpoints
 schoolRoutes.use('/register', authLimiter);
 schoolRoutes.use('/verify-email', authLimiter);
+schoolRoutes.use('/resend-otp', authLimiter);
 
 schoolRoutes.post(
   '/register',

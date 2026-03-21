@@ -12,40 +12,6 @@ import MediaUpload from '../middleware/MediaUpload.js';
 
 const developerRoutes = Router();
 
-//#region Role Management routes
-developerRoutes.post(
-  '/add-edit-role',
-  developerAuth,
-  checkPermission(developerRolePermissionList.roles.create),
-  DeveloperRolePermissionController.addEditRole
-);
-developerRoutes.get(
-  '/get-all-roles',
-  developerAuth,
-  checkPermission(developerRolePermissionList.roles.read),
-  DeveloperRolePermissionController.getAllRoles
-);
-developerRoutes.get(
-  '/get-role/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.roles.read),
-  DeveloperRolePermissionController.getRoleById
-);
-developerRoutes.delete(
-  '/delete-role/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.roles.delete),
-  checkRoleInUse,
-  DeveloperRolePermissionController.deleteRole
-);
-developerRoutes.post(
-  '/role-action-status/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.roles.status),
-  DeveloperRolePermissionController.roleActionStatus
-);
-//#endregion
-
 //#region Auth & Profile Management
 developerRoutes.use('/login', authLimiter);
 developerRoutes.use('/register', authLimiter);
@@ -117,6 +83,70 @@ developerRoutes.patch(
 );
 //#endregion
 
+//#region Admin CRUD Management
+developerRoutes.post(
+  '/add-edit-admin',
+  developerAuth,
+  checkPermission(developerRolePermissionList.admin_users.create),
+  DeveloperAdminController.addEditAdminProfile
+);
+
+developerRoutes.get(
+  '/get-all-admins',
+  developerAuth,
+  checkPermission(developerRolePermissionList.admin_users.read),
+  DeveloperAdminController.getAllAdmins
+);
+
+developerRoutes.delete(
+  '/delete-admin/:id',
+  developerAuth,
+  checkPermission(developerRolePermissionList.admin_users.delete),
+  DeveloperAdminController.deleteAdmin
+);
+
+developerRoutes.post(
+  '/admin-action-status/:id',
+  developerAuth,
+  checkPermission(developerRolePermissionList.admin_users.status),
+  DeveloperAdminController.adminStatusHandler
+);
+//#endregion
+
+//#region Role Management routes
+developerRoutes.post(
+  '/add-edit-role',
+  developerAuth,
+  checkPermission(developerRolePermissionList.roles.create),
+  DeveloperRolePermissionController.addEditRole
+);
+developerRoutes.get(
+  '/get-all-roles',
+  developerAuth,
+  checkPermission(developerRolePermissionList.roles.read),
+  DeveloperRolePermissionController.getAllRoles
+);
+developerRoutes.get(
+  '/get-role/:id',
+  developerAuth,
+  checkPermission(developerRolePermissionList.roles.read),
+  DeveloperRolePermissionController.getRoleById
+);
+developerRoutes.delete(
+  '/delete-role/:id',
+  developerAuth,
+  checkPermission(developerRolePermissionList.roles.delete),
+  checkRoleInUse,
+  DeveloperRolePermissionController.deleteRole
+);
+developerRoutes.post(
+  '/role-action-status/:id',
+  developerAuth,
+  checkPermission(developerRolePermissionList.roles.status),
+  DeveloperRolePermissionController.roleActionStatus
+);
+//#endregion
+
 //#region Sales Management
 developerRoutes.post(
   '/add-update-sales',
@@ -145,36 +175,6 @@ developerRoutes.delete(
   developerAuth,
   checkPermission(developerRolePermissionList.sales.delete),
   SalesController.deleteSales
-);
-//#endregion
-
-//#region Admin CRUD Management
-developerRoutes.post(
-  '/add-edit-admin',
-  developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.create),
-  DeveloperAdminController.addEditAdminProfile
-);
-
-developerRoutes.get(
-  '/get-all-admins',
-  developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.read),
-  DeveloperAdminController.getAllAdmins
-);
-
-developerRoutes.delete(
-  '/delete-admin/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.delete),
-  DeveloperAdminController.deleteAdmin
-);
-
-developerRoutes.post(
-  '/admin-action-status/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.status),
-  DeveloperAdminController.adminStatusHandler
 );
 //#endregion
 
