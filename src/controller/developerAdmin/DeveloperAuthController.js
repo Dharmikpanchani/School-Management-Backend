@@ -211,7 +211,10 @@ export const refreshToken = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const { token_id } = req;
-    await DeveloperAdmin.findByIdAndUpdate({ _id: token_id }, { isLogin: false });
+    await DeveloperAdmin.findByIdAndUpdate(
+      { _id: token_id },
+      { isLogin: false }
+    );
 
     clearRefreshTokenCookie(res);
     return ResponseHandler(
@@ -537,7 +540,7 @@ export const resendOtp = async (req, res) => {
     return ResponseHandler(
       res,
       StatusCodes.OK,
-      responseMessage.OTP_SENT_SUCCESSFULLY,
+      responseMessage.OTP_SENT_SUCCESSFULLY
     );
   } catch (error) {
     logger.error(error);
