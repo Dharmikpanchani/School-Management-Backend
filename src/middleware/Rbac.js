@@ -1,7 +1,14 @@
 import { StatusCodes } from 'http-status-codes';
-import { ResponseHandler } from '../services/CommonServices.js';
+import {
+  ResponseHandler,
+  CatchErrorHandler,
+} from '../services/CommonServices.js';
 import SchoolAdmin from '../models/admin/SchoolAdmin.js';
 import User from '../models/user/User.js';
+import { responseMessage } from '../utils/ResponseMessage.js';
+
+import Logger from '../utils/Logger.js';
+const logger = new Logger('Rbac.js');
 
 //#region Check Permission Middleware
 /**
@@ -55,6 +62,7 @@ export const checkPermission = (requiredPermission) => {
         responseMessage.ACCESS_DENIED_REQUIRES_REQUIREDPERMISSIO
       );
     } catch (error) {
+      logger.error(error);
       return ResponseHandler(
         res,
         StatusCodes.INTERNAL_SERVER_ERROR,

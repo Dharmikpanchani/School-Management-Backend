@@ -459,7 +459,7 @@ export const resendOtp = async (req, res) => {
       email,
       'DeveloperAdmin'
     ).catch((err) =>
-      console.error(`Error re-sending DeveloperAdmin Registration OTP: ${err}`)
+      logger.error(`Error re-sending DeveloperAdmin Registration OTP: ${err}`)
     );
 
     return ResponseHandler(

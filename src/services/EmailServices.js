@@ -77,7 +77,6 @@ export async function sendSubscriptionBaseMail(description, email) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('info', info);
     if (!info?.messageId) {
       throw new Error('Failed to send subscription email');
     }

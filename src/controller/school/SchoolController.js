@@ -19,6 +19,7 @@ import {
   sendSubscriptionBaseMail,
 } from '../../services/EmailServices.js'; // Can be reused for OTP or make a specific one
 import SchoolAdmin from '../../models/admin/SchoolAdmin.js';
+import { responseMessage } from '../../utils/ResponseMessage.js';
 
 const logger = new Logger('./src/controller/school/SchoolController.js');
 

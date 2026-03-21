@@ -81,7 +81,7 @@ export const createUser = async (req, res) => {
       `Your User Account Registration OTP is: ${otp}. Please verify to activate your account.`,
       [email]
     ).catch((err) =>
-      console.error(`Error sending User Registration OTP: ${err}`)
+      logger.error(`Error sending User Registration OTP: ${err}`)
     );
 
     return ResponseHandler(

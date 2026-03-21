@@ -10,7 +10,6 @@ import { StatusCodes } from 'http-status-codes';
 import {
   forgotPasswordOtpMail,
   sendRegisterVerificationEmail,
-  sendSubscriptionBaseMail,
 } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
 import RoleManagement from '../../models/admin/RolePermission.js';
@@ -298,14 +297,6 @@ export const resetPassword = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
-    const findSchool = await School.findOne({ schoolCode, isDeleted: false });
-    if (!findSchool) {
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        responseMessage.SCHOOL_NOT_EXIST
-      );
-    }
     const admin = await SchoolAdmin.findOne({
       _id: req.admin_id,
       isDeleted: false,
@@ -510,9 +501,9 @@ export const addEditAdminProfile = async (req, res) => {
         `Your SchoolAdmin Register OTP is: ${otp}`,
         email,
         'SchoolAdmin'
-      ).catch((err) =>
-        console.error(`Error sending SchoolAdmin Registration OTP: ${err}`)
-      );
+      ).catch((err) => {
+        logger.error(`Error sending SchoolAdmin Registration OTP: ${err}`);
+      });
 
       return ResponseHandler(
         res,
@@ -618,7 +609,7 @@ export const resendOtp = async (req, res) => {
       email,
       'SchoolAdmin'
     ).catch((err) =>
-      console.error(`Error re-sending SchoolAdmin Registration OTP: ${err}`)
+      logger.error(`Error re-sending SchoolAdmin Registration OTP: ${err}`)
     );
 
     return ResponseHandler(

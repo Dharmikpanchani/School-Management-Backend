@@ -110,7 +110,7 @@ export const addEditAdminProfile = async (req, res) => {
         email,
         'SchoolAdmin'
       ).catch((err) =>
-        console.error(`Error sending SchoolAdmin Registration OTP: ${err}`)
+        logger.error(`Error sending SchoolAdmin Registration OTP: ${err}`)
       );
 
       return ResponseHandler(
