@@ -85,7 +85,7 @@ export const login = async (req, res) => {
       const otp = generateOtp();
       await storeOtp('developer_login', email, otp);
       await sendLoginVerificationEmail(otp, email, 'SuperDeveloper');
-      
+
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -119,17 +119,24 @@ export const login = async (req, res) => {
 export const verifyLoginOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false }).populate('role');
-    
+    const developer = await DeveloperAdmin.findOne({
+      email,
+      isDeleted: false,
+    }).populate('role');
+
     if (!developer) {
-      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.DEVELOPER_NOT_FOUND);
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.DEVELOPER_NOT_FOUND
+      );
     }
-    
+
     const otpResult = await verifyOtp('developer_login', email, otp);
     if (!otpResult.success) {
       return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
     }
-    
+
     const payload = { id: developer._id, type: 'developer' };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);

@@ -92,7 +92,7 @@ export const login = async (req, res) => {
       const otp = generateOtp();
       await storeOtp('admin_login', email, otp);
       await sendLoginVerificationEmail(otp, email, 'SuperAdmin');
-      
+
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -127,27 +127,35 @@ export const login = async (req, res) => {
 export const verifyLoginOtp = async (req, res) => {
   try {
     const { email, otp, schoolCode } = req.body;
-    
+
     const findSchool = await School.findOne({ schoolCode, isDeleted: false });
     if (!findSchool) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.SCHOOL_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.SCHOOL_NOT_EXIST
+      );
     }
-    
+
     const admin = await SchoolAdmin.findOne({
       email,
       isDeleted: false,
       schoolId: findSchool._id,
     });
-    
+
     if (!admin) {
-      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ADMIN_NOT_FOUND
+      );
     }
-    
+
     const otpResult = await verifyOtp('admin_login', email, otp);
     if (!otpResult.success) {
       return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
     }
-    
+
     const payload = { id: admin._id, type: 'admin' };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
