@@ -35,7 +35,10 @@ export const register = async (req, res) => {
   try {
     const { name, email, phoneNumber, password, address } = req.body;
 
-    const existingDeveloper = await DeveloperAdmin.findOne({ email, isDeleted: false });
+    const existingDeveloper = await DeveloperAdmin.findOne({
+      email,
+      isDeleted: false,
+    });
     if (existingDeveloper) {
       return ResponseHandler(
         res,
