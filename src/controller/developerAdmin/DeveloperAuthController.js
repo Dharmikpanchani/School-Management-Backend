@@ -252,7 +252,7 @@ export const forgotPassword = async (req, res) => {
       );
     }
 
-    const otp = generateOtp();
+    const otp = await generateOtp();
     await storeOtp('developer_forgot', email, otp);
     await forgotPasswordOtpMail(email, otp);
 
@@ -260,7 +260,6 @@ export const forgotPassword = async (req, res) => {
       res,
       StatusCodes.OK,
       responseMessage.OTP_SENT_SUCCESSFULLY,
-      null
     );
   } catch (error) {
     logger.error(error);
@@ -578,7 +577,6 @@ export const resendForgotPasswordOtp = async (req, res) => {
       res,
       StatusCodes.OK,
       responseMessage.OTP_SENT_SUCCESSFULLY,
-      null
     );
   } catch (error) {
     logger.error(error);

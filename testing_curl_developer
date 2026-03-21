@@ -85,30 +85,17 @@ curl -X POST {{URL}}/api/developer/logout \
 # -------------------------------------------------------
 
 # 10. FORGOT PASSWORD (Sends OTP to email)
-curl -X POST {{URL}}/api/developer/forgot-password \
-  -H "Content-Type: application/json" \
-  -d '{"email":"new_admin@example.com"}'
+
 
 # 11. VERIFY FORGOT PASSWORD OTP
-curl -X POST {{URL}}/api/developer/verify-otp \
-  -H "Content-Type: application/json" \
-  -d '{"email":"new_admin@example.com","otp":"123456"}'
+
 
 # 12. RESEND FORGOT PASSWORD OTP
-curl -X POST {{URL}}/api/developer/resend-forgot-otp \
-  -H "Content-Type: application/json" \
-  -d '{"email":"new_admin@example.com"}'
+
 
 # 13. RESET PASSWORD (After OTP verification is successful)
-curl -X POST {{URL}}/api/developer/reset-password \
-  -H "Content-Type: application/json" \
-  -d '{"email":"new_admin@example.com","newPassword":"NewPassword@123","confirmPassword":"NewPassword@123"}'
 
 # 14. CHANGE PASSWORD (Requires Auth from logged in user)
-curl -X POST {{URL}}/api/developer/change-password \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer {{TOKEN}}" \
-  -d '{"oldPassword":"Password@123","newPassword":"NewPassword@123","confirmPassword":"NewPassword@123"}'
 
 
 # -------------------------------------------------------
