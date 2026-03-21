@@ -20,6 +20,12 @@ developerRoutes.use('/re-send-otp', authLimiter);
 developerRoutes.use('/resend-forgot-otp', authLimiter);
 
 developerRoutes.post(
+  '/register',
+  validator('developerRegisterSchema'),
+  DeveloperAuthController.register
+);
+
+developerRoutes.post(
   '/login',
   validator('developerLoginSchema'),
   DeveloperAuthController.login

@@ -90,7 +90,7 @@ export const addEditAdminProfile = async (req, res) => {
         );
 
       // Rate limit check
-      const rateLimit = await checkOtpRateLimit('admin', email);
+      const rateLimit = await checkOtpRateLimit('developer', email);
       if (rateLimit.limited)
         return ResponseHandler(
           res,
@@ -104,7 +104,7 @@ export const addEditAdminProfile = async (req, res) => {
 
       // Send OTP
       const otp = generateOtp();
-      await storeOtp('admin', email, otp);
+      await storeOtp('developer', email, otp);
       sendRegisterVerificationEmail(
         `Your DeveloperAdmin Register OTP is: ${otp}`,
         email,

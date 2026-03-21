@@ -265,6 +265,8 @@ export const responseMessage = {
   ADMIN_ACCOUNT_IS_DISABLED: 'Admin account is disabled',
   DEVELOPER_NOT_FOUND: 'Admin user not found',
   DEVELOPER_ACCOUNT_IS_DISABLED: 'Admin user account is disabled',
+  DEVELOPER_ALREADY_EXISTS: 'Admin user with this email already exists',
+  DEVELOPER_CREATED: 'Admin user registered successfully. Verify OTP.',
   REFRESH_TOKEN_REQUIRED_STRING: 'Refresh token required string',
   INVALID_REFRESH_TOKEN: 'Invalid refresh token',
   REFRESH_TOKEN_HAS_EXPIRED_PLEASE_LOG_IN_:

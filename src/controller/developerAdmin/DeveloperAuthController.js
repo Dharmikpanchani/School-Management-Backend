@@ -30,6 +30,64 @@ const logger = new Logger(
   './src/controller/developerAdmin/DeveloperAuthController.js'
 );
 
+//#region Register
+export const register = async (req, res) => {
+  try {
+    const { name, email, phoneNumber, password, address } = req.body;
+
+    const existingDeveloper = await DeveloperAdmin.findOne({ email, isDeleted: false });
+    if (existingDeveloper) {
+      return ResponseHandler(
+        res,
+        StatusCodes.CONFLICT,
+        responseMessage.DEVELOPER_ALREADY_EXISTS
+      );
+    }
+
+    const rateLimit = await checkOtpRateLimit('developer', email);
+    if (rateLimit.limited) {
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
+    }
+
+    const hashedPassword = await encryptPassword(password);
+    const payload = {
+      name,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+      address,
+      isVerified: false,
+    };
+
+    const developer = await DeveloperAdmin.create(payload);
+
+    const otp = generateOtp();
+    await storeOtp('developer', email, otp);
+    sendRegisterVerificationEmail(
+      `Your DeveloperAdmin Register OTP is: ${otp}`,
+      email,
+      'DeveloperAdmin'
+    ).catch((err) =>
+      logger.error(`Error sending Developer Registration OTP: ${err}`)
+    );
+
+    return ResponseHandler(
+      res,
+      StatusCodes.CREATED,
+      responseMessage.DEVELOPER_CREATED,
+      { adminId: developer._id, email }
+    );
+  } catch (error) {
+    logger.error(error);
+    return CatchErrorHandler(res, error);
+  }
+};
+//#endregion
+
 //#region Login
 export const login = async (req, res) => {
   try {
