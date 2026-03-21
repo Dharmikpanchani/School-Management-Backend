@@ -29,6 +29,26 @@ export async function sendRegisterVerificationEmail(otp, email, type) {
   }
 }
 
+export async function sendLoginVerificationEmail(otp, email, type) {
+  try {
+    const templatePath = path.join(__dirname, '../views/Register.ejs');
+
+    const emailTemplate = await ejs.renderFile(templatePath, { otp, type });
+
+    const mailOptions = {
+      from: `"${type} App" <${config.EMAIL_FROM}>`,
+      to: email,
+      subject: `${type} Login OTP Verification`,
+      html: emailTemplate,
+    };
+
+    await transporter.sendMail(mailOptions);
+    logger.info(`Login OTP email sent successfully to ${email}`);
+  } catch (error) {
+    logger.error(`Error sending Login OTP email: ${error}`);
+  }
+}
+
 export async function forgotPasswordOtpMail(email, otp) {
   try {
     const templatePath = path.join(__dirname, '../views/ForgotPassword.ejs');

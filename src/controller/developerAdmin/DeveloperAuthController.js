@@ -10,6 +10,7 @@ import { StatusCodes } from 'http-status-codes';
 import {
   forgotPasswordOtpMail,
   sendRegisterVerificationEmail,
+  sendLoginVerificationEmail,
 } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
 import {
@@ -72,6 +73,27 @@ export const login = async (req, res) => {
       );
     }
 
+    if (developer.isSuperDeveloper) {
+      const rateLimit = await checkOtpRateLimit('developer_login', email);
+      if (rateLimit.limited) {
+        return ResponseHandler(
+          res,
+          StatusCodes.TOO_MANY_REQUESTS,
+          rateLimit.message
+        );
+      }
+      const otp = generateOtp();
+      await storeOtp('developer_login', email, otp);
+      await sendLoginVerificationEmail(otp, email, 'SuperDeveloper');
+      
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        'OTP sent to your email for verification.',
+        { requireOtp: true, email: email }
+      );
+    }
+
     const payload = { id: developer._id, type: 'developer' };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
@@ -85,6 +107,40 @@ export const login = async (req, res) => {
       {
         accessToken,
       }
+    );
+  } catch (error) {
+    logger.error(error);
+    return CatchErrorHandler(res, error);
+  }
+};
+//#endregion
+
+//#region Verify Login OTP
+export const verifyLoginOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false }).populate('role');
+    
+    if (!developer) {
+      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.DEVELOPER_NOT_FOUND);
+    }
+    
+    const otpResult = await verifyOtp('developer_login', email, otp);
+    if (!otpResult.success) {
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
+    }
+    
+    const payload = { id: developer._id, type: 'developer' };
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
+    setRefreshTokenCookie(res, refreshToken);
+
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
+      { accessToken }
     );
   } catch (error) {
     logger.error(error);

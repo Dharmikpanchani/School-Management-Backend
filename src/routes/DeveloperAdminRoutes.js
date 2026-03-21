@@ -23,6 +23,13 @@ developerRoutes.post(
   validator('developerLoginSchema'),
   DeveloperAuthController.login
 );
+
+developerRoutes.post(
+  '/verify-login-otp',
+  authLimiter,
+  validator('developerVerifyLoginOtpSchema'),
+  DeveloperAuthController.verifyLoginOtp
+);
 developerRoutes.post(
   '/refresh-token',
   refreshTokenAuth,

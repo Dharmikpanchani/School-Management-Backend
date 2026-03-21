@@ -10,6 +10,7 @@ import { StatusCodes } from 'http-status-codes';
 import {
   forgotPasswordOtpMail,
   sendRegisterVerificationEmail,
+  sendLoginVerificationEmail,
 } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
 import RoleManagement from '../../models/schoolAdmin/RolePermission.js';
@@ -79,6 +80,27 @@ export const login = async (req, res) => {
       );
     }
 
+    if (admin.isSuperAdmin) {
+      const rateLimit = await checkOtpRateLimit('admin_login', email);
+      if (rateLimit.limited) {
+        return ResponseHandler(
+          res,
+          StatusCodes.TOO_MANY_REQUESTS,
+          rateLimit.message
+        );
+      }
+      const otp = generateOtp();
+      await storeOtp('admin_login', email, otp);
+      await sendLoginVerificationEmail(otp, email, 'SuperAdmin');
+      
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        'OTP sent to your email for verification.',
+        { requireOtp: true, email: email }
+      );
+    }
+
     const payload = { id: admin._id, type: 'admin' };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
@@ -95,6 +117,51 @@ export const login = async (req, res) => {
       {
         accessToken,
       }
+    );
+  } catch (error) {
+    logger.error(error);
+    return CatchErrorHandler(res, error);
+  }
+};
+
+export const verifyLoginOtp = async (req, res) => {
+  try {
+    const { email, otp, schoolCode } = req.body;
+    
+    const findSchool = await School.findOne({ schoolCode, isDeleted: false });
+    if (!findSchool) {
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.SCHOOL_NOT_EXIST);
+    }
+    
+    const admin = await SchoolAdmin.findOne({
+      email,
+      isDeleted: false,
+      schoolId: findSchool._id,
+    });
+    
+    if (!admin) {
+      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
+    }
+    
+    const otpResult = await verifyOtp('admin_login', email, otp);
+    if (!otpResult.success) {
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
+    }
+    
+    const payload = { id: admin._id, type: 'admin' };
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
+    setRefreshTokenCookie(res, refreshToken);
+
+    const adminData = admin.toObject();
+    delete adminData.password;
+
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
+      { accessToken }
     );
   } catch (error) {
     logger.error(error);

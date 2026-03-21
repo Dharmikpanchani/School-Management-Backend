@@ -25,6 +25,13 @@ adminRoutes.post(
 );
 
 adminRoutes.post(
+  '/verify-login-otp',
+  authLimiter,
+  validator('adminVerifyLoginOtpSchema'),
+  AdminController.verifyLoginOtp
+);
+
+adminRoutes.post(
   '/add-edit-admin',
   adminAuth,
   checkPermission(rolePermissionList.admin_users.create),
