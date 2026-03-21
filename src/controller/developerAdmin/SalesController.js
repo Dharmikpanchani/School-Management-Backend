@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import Sales from '../../models/developer/Sales.js';
+import Sales from '../../models/developerAdmin/Sales.js';
 import {
   CatchErrorHandler,
   ResponseHandler,
@@ -7,7 +7,7 @@ import {
 import Logger from '../../utils/Logger.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 
-const logger = new Logger('./src/controller/developer/SalesController.js');
+const logger = new Logger('./src/controller/developerAdmin/SalesController.js');
 
 //#region Add / Edit Sales
 export const addEditSales = async (req, res) => {

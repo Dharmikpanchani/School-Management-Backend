@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { validator } from '../middleware/Validator.js';
-import * as SalesController from '../controller/developer/SalesController.js';
-import * as DeveloperAdminController from '../controller/developer/DeveloperAdminController.js';
-import * as DeveloperAuthController from '../controller/developer/DeveloperAuthController.js';
-import * as DeveloperRolePermissionController from '../controller/developer/DeveloperRolePermissionController.js';
+import * as SalesController from '../controller/developerAdmin/SalesController.js';
+import * as DeveloperAdminController from '../controller/developerAdmin/DeveloperAdminController.js';
+import * as DeveloperAuthController from '../controller/developerAdmin/DeveloperAuthController.js';
+import * as DeveloperRolePermissionController from '../controller/developerAdmin/DeveloperRolePermissionController.js';
 import { developerAuth, refreshTokenAuth } from '../middleware/Auth.js';
 import { checkPermission, checkRoleInUse } from '../middleware/Rbac.js';
 import { developerRolePermissionList } from '../utils/RolePermissionList.js';

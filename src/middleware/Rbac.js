@@ -3,7 +3,7 @@ import {
   ResponseHandler,
   CatchErrorHandler,
 } from '../services/CommonServices.js';
-import SchoolAdmin from '../models/admin/SchoolAdmin.js';
+import SchoolAdmin from '../models/schoolAdmin/SchoolAdmin.js';
 import User from '../models/user/User.js';
 import { responseMessage } from '../utils/ResponseMessage.js';
 

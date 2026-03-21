@@ -1,4 +1,4 @@
-import SchoolAdmin from '../../models/admin/SchoolAdmin.js';
+import SchoolAdmin from '../../models/schoolAdmin/SchoolAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import {
   ResponseHandler,
@@ -9,7 +9,7 @@ import {
 import { StatusCodes } from 'http-status-codes';
 import { sendRegisterVerificationEmail } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
-import RoleManagement from '../../models/admin/RolePermission.js';
+import RoleManagement from '../../models/schoolAdmin/RolePermission.js';
 import {
   generateOtp,
   storeOtp,
@@ -17,7 +17,7 @@ import {
 } from '../../services/OtpService.js';
 
 const logger = new Logger(
-  './src/controller/developer/DeveloperAdminController.js'
+  './src/controller/developerAdmin/DeveloperAdminController.js'
 );
 
 //#region ➕ Add / ✏️ Edit SchoolAdmin Profile

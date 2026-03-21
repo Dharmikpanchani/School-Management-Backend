@@ -15,7 +15,7 @@ import {
 } from '../../services/OtpService.js';
 import { sendSubscriptionBaseMail } from '../../services/EmailServices.js';
 
-const logger = new Logger('./src/controller/admin/UserController.js');
+const logger = new Logger('./src/controller/schoolAdmin/UserController.js');
 
 //#region Create User (by Admin)
 export const createUser = async (req, res) => {

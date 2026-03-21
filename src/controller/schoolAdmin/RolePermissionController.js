@@ -1,4 +1,4 @@
-import RoleManagement from '../../models/admin/RolePermission.js';
+import RoleManagement from '../../models/schoolAdmin/RolePermission.js';
 import { StatusCodes } from 'http-status-codes';
 import {
   ResponseHandler,
@@ -6,18 +6,17 @@ import {
 } from '../../services/CommonServices.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import Logger from '../../utils/Logger.js';
-import SchoolAdmin from '../../models/admin/SchoolAdmin.js';
+import SchoolAdmin from '../../models/schoolAdmin/SchoolAdmin.js';
 
-const logger = new Logger(
-  'src/controller/developer/DeveloperRolePermissionController.js'
-);
+const logger = new Logger('src/controllers/roleManagement.controller.js');
 
-//#region Add / Edit Role
+//#region ➕ Add / ✏️ Edit Role
 export const addEditRole = async (req, res) => {
   try {
     const { id, role, permissions } = req.body;
     let parsedPermissions = permissions;
 
+    // Parse permissions if string
     if (typeof permissions === 'string') {
       try {
         parsedPermissions = JSON.parse(permissions);
@@ -31,6 +30,7 @@ export const addEditRole = async (req, res) => {
       }
     }
 
+    // Validate parsedPermissions is an array
     if (!Array.isArray(parsedPermissions)) {
       return ResponseHandler(
         res,
@@ -39,6 +39,7 @@ export const addEditRole = async (req, res) => {
       );
     }
 
+    // Build payload
     const payload = {
       role: role?.trim(),
       permissions: parsedPermissions,
@@ -47,6 +48,7 @@ export const addEditRole = async (req, res) => {
     let result;
 
     if (id) {
+      // 🔹 Update flow
       const existingRole = await RoleManagement.findOne({
         _id: id,
         isDeleted: false,
@@ -60,6 +62,7 @@ export const addEditRole = async (req, res) => {
         );
       }
 
+      // 🔹 Check duplicate role name (excluding current id)
       const duplicate = await RoleManagement.findOne({
         _id: { $ne: id },
         role: payload.role,
@@ -77,6 +80,7 @@ export const addEditRole = async (req, res) => {
       result = await RoleManagement.findByIdAndUpdate(id, payload, {
         new: true,
       });
+
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -84,10 +88,11 @@ export const addEditRole = async (req, res) => {
         result
       );
     } else {
-      // Global DeveloperAdmin implementation ensures no tenant restriction on roles created
+      // 🔹 Create flow → check duplicate
       const duplicate = await RoleManagement.findOne({
         role: payload.role,
         isDeleted: false,
+        schoolId: req.school_id,
       });
 
       if (duplicate) {
@@ -99,6 +104,7 @@ export const addEditRole = async (req, res) => {
       }
 
       result = await RoleManagement.create(payload);
+
       return ResponseHandler(
         res,
         StatusCodes.CREATED,
@@ -113,16 +119,18 @@ export const addEditRole = async (req, res) => {
 };
 //#endregion
 
-//#region Get All Roles
+//#region 📄 Get All Roles
 export const getAllRoles = async (req, res) => {
   try {
     const { pageNumber = 1, perPageData, searchRequest } = req.query;
 
+    // Search setup
     const query = { isDeleted: false };
     if (searchRequest) {
       query.$or = [{ role: { $regex: searchRequest, $options: 'i' } }];
     }
 
+    // Pagination setup
     const totalArrayLength = await RoleManagement.countDocuments(query);
     const page = parseInt(pageNumber);
     const limit = parseInt(perPageData || totalArrayLength);
@@ -151,7 +159,7 @@ export const getAllRoles = async (req, res) => {
 };
 //#endregion
 
-//#region Get Role By ID
+//#region 🔍 Get Role By ID
 export const getRoleById = async (req, res) => {
   try {
     const data = await RoleManagement.findOne({
@@ -180,12 +188,16 @@ export const getRoleById = async (req, res) => {
 };
 //#endregion
 
-//#region Delete Role (Soft Delete)
+//#region 🗑️ Delete Role (Soft Delete)
 export const deleteRole = async (req, res) => {
   try {
     const { id } = req.params;
+    const data = await RoleManagement.findOneAndUpdate(
+      { _id: id, isDeleted: false },
+      { isDeleted: true },
+      { new: true }
+    );
 
-    // Check if role is bound to any global/tenant admins
     const isRoleInUse = await SchoolAdmin.exists({
       role: id,
       isDeleted: false,
@@ -197,12 +209,6 @@ export const deleteRole = async (req, res) => {
         responseMessage.ROLE_ASSIGNED_TO_USER_DELETE
       );
     }
-
-    const data = await RoleManagement.findOneAndUpdate(
-      { _id: id, isDeleted: false },
-      { isDeleted: true },
-      { new: true }
-    );
 
     if (!data) {
       return ResponseHandler(
@@ -231,23 +237,25 @@ export const roleActionStatus = async (req, res) => {
     const { id } = req.params;
 
     const role = await RoleManagement.findOne({ _id: id, isDeleted: false });
-    if (!role) {
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.ROLE_NOT_FOUND
-      );
-    }
 
     const isRoleInUse = await SchoolAdmin.exists({
       role: id,
       isDeleted: false,
+      schoolId: req.school_id,
     });
     if (isRoleInUse) {
       return ResponseHandler(
         res,
         StatusCodes.BAD_REQUEST,
         responseMessage.ROLE_ASSIGNED_TO_USER_STATUS
+      );
+    }
+
+    if (!role) {
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ROLE_NOT_FOUND
       );
     }
 

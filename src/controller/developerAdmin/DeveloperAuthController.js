@@ -1,4 +1,4 @@
-import DeveloperAdmin from '../../models/developer/DeveloperAdmin.js';
+import DeveloperAdmin from '../../models/developerAdmin/DeveloperAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import {
   ResponseHandler,
@@ -27,7 +27,7 @@ import {
 
 const { filterData } = await import('../../services/CommonServices.js');
 const logger = new Logger(
-  './src/controller/developer/DeveloperAuthController.js'
+  './src/controller/developerAdmin/DeveloperAuthController.js'
 );
 
 //#region Login

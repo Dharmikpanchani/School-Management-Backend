@@ -2,8 +2,8 @@ import { StatusCodes } from 'http-status-codes';
 import { responseMessage } from '../utils/ResponseMessage.js';
 import Logger from '../utils/Logger.js';
 import User from '../models/user/User.js';
-import SchoolAdmin from '../models/admin/SchoolAdmin.js';
-import DeveloperAdmin from '../models/developer/DeveloperAdmin.js';
+import SchoolAdmin from '../models/schoolAdmin/SchoolAdmin.js';
+import DeveloperAdmin from '../models/developerAdmin/DeveloperAdmin.js';
 import { verifyToken } from '../services/TokenService.js';
 import {
   CatchErrorHandler,

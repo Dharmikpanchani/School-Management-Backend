@@ -1,4 +1,4 @@
-import SchoolAdmin from '../../models/admin/SchoolAdmin.js';
+import SchoolAdmin from '../../models/schoolAdmin/SchoolAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import {
   ResponseHandler,
@@ -12,7 +12,7 @@ import {
   sendRegisterVerificationEmail,
 } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
-import RoleManagement from '../../models/admin/RolePermission.js';
+import RoleManagement from '../../models/schoolAdmin/RolePermission.js';
 import {
   generateOtp,
   storeOtp,
@@ -28,7 +28,7 @@ import {
 import School from '../../models/school/School.js';
 
 const { filterData } = await import('../../services/CommonServices.js');
-const logger = new Logger('./src/controller/admin/AdminController.js');
+const logger = new Logger('./src/controller/schoolAdmin/AdminController.js');
 
 export const login = async (req, res) => {
   try {
