@@ -39,6 +39,10 @@ const DeveloperSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isLogin: {
+      type: Boolean,
+      default: false,
+    },
     address: {
       type: String,
       required: false,

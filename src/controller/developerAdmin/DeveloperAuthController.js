@@ -100,6 +100,9 @@ export const login = async (req, res) => {
 
     setRefreshTokenCookie(res, refreshToken);
 
+    developer.isLogin = true;
+    await developer.save();
+
     return ResponseHandler(
       res,
       StatusCodes.OK,
@@ -142,6 +145,9 @@ export const verifyLoginOtp = async (req, res) => {
     const refreshToken = generateRefreshToken(payload);
 
     setRefreshTokenCookie(res, refreshToken);
+
+    developer.isLogin = true;
+    await developer.save();
 
     return ResponseHandler(
       res,
@@ -204,6 +210,9 @@ export const refreshToken = async (req, res) => {
 //#region Logout
 export const logout = async (req, res) => {
   try {
+    const { token_id } = req;
+    await DeveloperAdmin.findByIdAndUpdate({ _id: token_id }, { isLogin: false });
+
     clearRefreshTokenCookie(res);
     return ResponseHandler(
       res,
@@ -416,23 +425,23 @@ export const profile = async (req, res) => {
 //#region Update Profile
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email, phoneNumber, address } = req.body;
+    const { name, phoneNumber, address } = req.body;
     const update = await DeveloperAdmin.findOneAndUpdate(
       { _id: req.developer_id },
       {
         name,
-        email,
         phoneNumber,
         address,
         [req.imageUrl ? 'image' : '']: req.imageUrl,
       },
       { new: true }
     );
+    const data = filterData(update);
     return ResponseHandler(
       res,
       StatusCodes.OK,
       responseMessage.PROFILE_UPDATED,
-      update
+      data
     );
   } catch (error) {
     logger.error(error);
@@ -529,7 +538,6 @@ export const resendOtp = async (req, res) => {
       res,
       StatusCodes.OK,
       responseMessage.OTP_SENT_SUCCESSFULLY,
-      null
     );
   } catch (error) {
     logger.error(error);

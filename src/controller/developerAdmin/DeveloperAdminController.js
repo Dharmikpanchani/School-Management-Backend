@@ -117,7 +117,7 @@ export const addEditAdminProfile = async (req, res) => {
         res,
         StatusCodes.CREATED,
         responseMessage.ADMIN_CREATED,
-        { adminId: result._id, email }
+        { email }
       );
     }
   } catch (error) {
