@@ -50,7 +50,8 @@ export const checkPermission = (requiredPermission) => {
         );
       }
 
-      const hasExactPermission = role?.permissions?.includes(requiredPermission);
+      const hasExactPermission =
+        role?.permissions?.includes(requiredPermission);
 
       if (hasExactPermission) {
         return next();
