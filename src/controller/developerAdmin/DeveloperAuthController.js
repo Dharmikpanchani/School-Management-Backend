@@ -259,7 +259,7 @@ export const forgotPassword = async (req, res) => {
     return ResponseHandler(
       res,
       StatusCodes.OK,
-      responseMessage.OTP_SENT_SUCCESSFULLY,
+      responseMessage.OTP_SENT_SUCCESSFULLY
     );
   } catch (error) {
     logger.error(error);
@@ -576,7 +576,7 @@ export const resendForgotPasswordOtp = async (req, res) => {
     return ResponseHandler(
       res,
       StatusCodes.OK,
-      responseMessage.OTP_SENT_SUCCESSFULLY,
+      responseMessage.OTP_SENT_SUCCESSFULLY
     );
   } catch (error) {
     logger.error(error);
