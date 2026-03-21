@@ -24,7 +24,7 @@ import { responseMessage } from '../../utils/ResponseMessage.js';
 const logger = new Logger('./src/controller/school/SchoolController.js');
 
 //#region school Registration (with optional Referral)
-export const register = async (req, res) => {
+export const schoolRegister = async (req, res) => {
   try {
     const {
       schoolName,
@@ -32,7 +32,7 @@ export const register = async (req, res) => {
       email,
       phoneNumber,
       password,
-      referral,
+      referralId,
       schoolCode,
     } = req.body;
 
@@ -51,11 +51,11 @@ export const register = async (req, res) => {
 
     // 2. Referral Check
     let existingReferral = null;
-    if (referral?.email && referral?.number) {
-      existingReferral = await Referral.findOne({
-        email: referral.email,
-        number: referral.number,
-      });
+    if (referralId) {
+      existingReferral = await Referral.findById(referralId).populate(
+        'schools',
+        'schoolName email phoneNumber schoolCode isActive'
+      );
 
       if (!existingReferral) {
         return ResponseHandler(
@@ -101,15 +101,9 @@ export const register = async (req, res) => {
       isVerified: false,
     });
 
-    // 7. Referral Update
+    // 7. Referral Update — store only schoolId
     if (existingReferral) {
-      existingReferral.schools.push({
-        schoolId: newSchool._id,
-        schoolName: newSchool.schoolName,
-        schoolEmailId: newSchool.email,
-        schoolPhoneNumber: newSchool.phoneNumber,
-        isPaid: false,
-      });
+      existingReferral.schools.push(newSchool._id);
       await existingReferral.save();
     }
 

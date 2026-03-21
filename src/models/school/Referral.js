@@ -18,21 +18,8 @@ const ReferralSchema = new mongoose.Schema(
     },
     schools: [
       {
-        schoolId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'School',
-        },
-        schoolName: String,
-        schoolEmailId: String,
-        schoolPhoneNumber: String,
-        isPaid: {
-          type: Boolean,
-          default: false,
-        },
-        registeredAt: {
-          type: Date,
-          default: Date.now,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'School',
       },
     ],
   },

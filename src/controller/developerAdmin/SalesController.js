@@ -92,7 +92,9 @@ export const addEditSales = async (req, res) => {
 //#region Get All Sales
 export const getAllSales = async (req, res) => {
   try {
-    const salesProfiles = await Sales.find().sort({ createdAt: -1 });
+    const salesProfiles = await Sales.find()
+      .sort({ createdAt: -1 })
+      .populate('schools', 'schoolName email phoneNumber schoolCode isActive');
     return ResponseHandler(
       res,
       StatusCodes.OK,
@@ -110,7 +112,10 @@ export const getAllSales = async (req, res) => {
 export const getSalesById = async (req, res) => {
   try {
     const { id } = req.params;
-    const salesProfile = await Sales.findById(id);
+    const salesProfile = await Sales.findById(id).populate(
+      'schools',
+      'schoolName email phoneNumber schoolCode isActive'
+    );
 
     if (!salesProfile) {
       return ResponseHandler(
