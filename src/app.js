@@ -17,33 +17,37 @@ const app = express();
 const logger = new Logger('app.js');
 
 app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })); // For images
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' })); // For images
 
-app.use(cors({
-  origin: '*', // Adjust this to your specific frontend domains in production for better security
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // required to send/receive cookies
-}));
+app.use(
+  cors({
+    origin: '*', // Adjust this to your specific frontend domains in production for better security
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // required to send/receive cookies
+  })
+);
 
 app.disable('x-powered-by');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(process.env.COOKIE_SECRET || 'cookie_secret_school_saas_prod'));
+app.use(
+  cookieParser(process.env.COOKIE_SECRET || 'cookie_secret_school_saas_prod')
+);
 app.use(compression());
 
 // Apply rate limiter to all api routes
 app.use('/api', apiLimiter);
 
 app.use(express.static(path.join(__dirname, '../public')));
-app.use('/api/images', express.static(path.join(__dirname, '../public/uploads')));
+app.use(
+  '/api/images',
+  express.static(path.join(__dirname, '../public/uploads'))
+);
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type,Authorization,auth'
-  );
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,auth');
   next();
 });
 

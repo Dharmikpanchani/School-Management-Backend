@@ -377,11 +377,14 @@ const schoolRegisterSchema = joi.object({
     .noWhiteSpaces()
     .required()
     .label('Password'),
-  referral: joi.object({
-    email: joistring.email().required(),
-    number: joistring.required(),
-    upiId: joistring.optional().allow(''),
-  }).optional().label('Referral'),
+  referral: joi
+    .object({
+      email: joistring.email().required(),
+      number: joistring.required(),
+      upiId: joistring.optional().allow(''),
+    })
+    .optional()
+    .label('Referral'),
 });
 
 const schoolVerifyEmailSchema = joi.object({
@@ -461,10 +464,102 @@ const adminVerifyUserOtpSchema = joi.object({
   otp: joistring.required().length(6).label('OTP'),
 });
 
-const createReferralSchema = joi.object({
+const addEditSalesSchema = joi.object({
+  id: joistring.optional().allow('').label('ID'),
   email: joistring.email().required().label('Email'),
   number: joistring.required().label('Phone number'),
-  upiId: joistring.optional().allow(''),
+  upiId: joistring.optional().allow('').label('UPI ID'),
+});
+
+const developerLoginSchema = joi.object().keys({
+  email: joistring.email().required().label('Email'),
+  password: joistring.required().label('Password'),
+});
+
+const developerForgotPasswordSchema = joi.object().keys({
+  email: joistring.email().required().label('Email'),
+});
+
+const developerResetPasswordSchema = joi.object().keys({
+  email: joistring.email().required().label('Email'),
+  newPassword: joiPassword
+    .string()
+    .minOfSpecialCharacters(1)
+    .messages({
+      'password.minOfSpecialCharacters':
+        'New password must include at least one special character.',
+    })
+    .minOfLowercase(1)
+    .messages({
+      'password.minOfLowercase':
+        'New password must include at least one lowercase letter.',
+    })
+    .minOfUppercase(1)
+    .messages({
+      'password.minOfUppercase':
+        'New password must include at least one uppercase letter.',
+    })
+    .minOfNumeric(1)
+    .messages({
+      'password.minOfNumeric':
+        'New password must include at least one numeric digit.',
+    })
+    .noWhiteSpaces()
+    .messages({
+      'password.noWhiteSpaces': 'New password must not contain whitespace.',
+    })
+    .min(8)
+    .messages({
+      'password.min': 'New password must be at least 8 characters long.',
+    })
+    .required()
+    .label('New password'),
+
+  confirmPassword: joiPassword
+    .string()
+    .minOfSpecialCharacters(1)
+    .messages({
+      'password.minOfSpecialCharacters':
+        'Confirm password must include at least one special character.',
+    })
+    .minOfLowercase(1)
+    .messages({
+      'password.minOfLowercase':
+        'Confirm password must include at least one lowercase letter.',
+    })
+    .minOfUppercase(1)
+    .messages({
+      'password.minOfUppercase':
+        'Confirm password must include at least one uppercase letter.',
+    })
+    .minOfNumeric(1)
+    .messages({
+      'password.minOfNumeric':
+        'Confirm password must include at least one numeric digit.',
+    })
+    .noWhiteSpaces()
+    .messages({
+      'password.noWhiteSpaces': 'Confirm password must not contain whitespace.',
+    })
+    .min(8)
+    .messages({
+      'password.min': 'Confirm password must be at least 8 characters long.',
+    })
+    .required()
+    .label('Confirm password'),
+});
+
+const developerVerifyRegistrationOtpSchema = joi.object({
+  email: joistring.email().required().label('Email'),
+  otp: joistring.required().length(6).label('OTP'),
+});
+
+const developerUpdateProfileSchema = joi.object({
+  name: joistring.optional().label('Name'),
+  email: joistring.optional().email().label('Email'),
+  phoneNumber: joistring.optional().label('Phone number'),
+  address: joistring.optional().allow('').label('Address'),
+  image: joistring.optional().allow('').label('Image'),
 });
 
 export default {
@@ -488,5 +583,10 @@ export default {
   adminVerifyRegistrationOtpSchema,
   adminCreateUserSchema,
   adminVerifyUserOtpSchema,
-  createReferralSchema,
+  addEditSalesSchema,
+  developerLoginSchema,
+  developerForgotPasswordSchema,
+  developerResetPasswordSchema,
+  developerVerifyRegistrationOtpSchema,
+  developerUpdateProfileSchema,
 };

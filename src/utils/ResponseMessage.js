@@ -200,4 +200,81 @@ export const responseMessage = {
   ABOUTUS_CREATE_FAILED: 'Failed to create AboutUs',
   ABOUTUS_FETCH_SUCCESS: 'AboutUs fetched successfully',
   ABOUTUS_DELETE_SUCCESS: 'AboutUs deleted successfully',
+
+  SALES_CREATED: 'Sales profile created successfully',
+  SALES_UPDATED: 'Sales profile updated successfully',
+  SALES_FETCH_SUCCESS: 'Sales profile(s) fetched successfully',
+  SALES_NOT_FOUND: 'Sales profile not found',
+  SALES_DELETED: 'Sales profile deleted successfully',
+  SALES_ALREADY_EXISTS:
+    'Sales profile with this email, number, or UPI ID already exists',
+
+  ACCOUNT_NOT_VERIFIED_PLEASE_VERIFY_OTP:
+    'Account not verified. Please verify OTP.',
+  ACCOUNT_IS_DISABLED: 'Account is disabled.',
+  INVALID_TOKEN_TYPE: 'Invalid token type',
+  INVALID_OR_DISABLED_ACCOUNT: 'Invalid or disabled account',
+  TOKEN_REFRESHED_SUCCESSFULLY: 'Token refreshed successfully',
+  LOGGED_OUT_SUCCESSFULLY: 'Logged out successfully',
+  PASSWORD_IS_REQUIRED_TO_CREATE_A_NEW_ADM:
+    'Password is required to create a new admin',
+  ADMIN_CREATED_OTP_SENT_TO_EMAIL_FOR_VERI:
+    'Admin created. OTP sent to email for verification.',
+  ADMIN_ALREADY_VERIFIED: 'Admin already verified',
+  TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE:
+    'Too many OTP attempts. Registration cancelled and data removed. Please register again.',
+  ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_:
+    'Admin verified successfully. You can now login.',
+  ADMIN_IS_ALREADY_VERIFIED_NO_OTP_NEEDED:
+    'Admin is already verified. No OTP needed.',
+  PERMISSIONS_MUST_BE_A_VALID_JSON_ARRAY:
+    'Permissions must be a valid JSON array',
+  PERMISSIONS_MUST_BE_AN_ARRAY: 'Permissions must be an array',
+  USER_WITH_THIS_EMAIL_ALREADY_EXISTS: 'User with this email already exists',
+  USER_CREATED_SUCCESSFULLY_OTP_SENT_FOR_V:
+    'User created successfully. OTP sent for verification.',
+  ACCESS_DENIED_FOR_THIS_USER: 'Access denied for this user',
+  USER_VERIFIED_AND_ACTIVATED_SUCCESSFULLY:
+    'User verified and activated successfully.',
+  USER_UPDATED_SUCCESSFULLY: 'User updated successfully',
+  SCHOOL_ALREADY_EXISTS: 'School already exists',
+  REFERRAL_NOT_FOUND: 'Referral not found',
+  SCHOOL_ADMIN_REGISTERED_SUCCESSFULLY_VER:
+    'School & Admin registered successfully. Verify admin via OTP.',
+  SCHOOL_NOT_FOUND: 'School not found',
+  ADMIN_NOT_FOUND_FOR_THIS_SCHOOL: 'Admin not found for this school',
+  SCHOOL_IS_ALREADY_VERIFIED: 'School is already verified',
+  TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE_1:
+    'Too many OTP attempts. Registration cancelled. Please register again.',
+  SCHOOL_EMAIL_VERIFIED_AND_ACCOUNT_ACTIVA:
+    'School email verified and account activated successfully',
+  SCHOOL_NOT_FOUND_1: 'school not found',
+  OTP_RESENT_SUCCESSFULLY: 'OTP resent successfully',
+  PROFILE_RETRIEVED_EFFECTIVELY: 'Profile retrieved effectively',
+  PHONE_NUMBER_ALREADY_IN_USE: 'Phone number already in use',
+  SCHOOLS_RETRIEVED_SUCCESSFULLY: 'Schools retrieved successfully',
+  SCHOOL_RETRIEVED_SUCCESSFULLY: 'School retrieved successfully',
+  PHONE_NUMBER_ALREADY_EXISTS: 'Phone number already exists',
+  SCHOOL_UPDATED_SUCCESSFULLY: 'School updated successfully',
+  PLEASE_VERIFY_YOUR_ACCOUNT_FIRST: 'Please verify your account first',
+  YOUR_ACCOUNT_IS_DISABLED: 'Your account is disabled',
+  CREDENTIALS_VERIFIED_OTP_SENT_TO_EMAIL_T:
+    'Credentials verified. OTP sent to email to complete login.',
+  ACCESS_TOKEN_HAS_EXPIRED: 'Access token has expired',
+  INVALID_ACCESS_TOKEN: 'Invalid access token',
+  ADMIN_ACCOUNT_IS_DISABLED: 'Admin account is disabled',
+  DEVELOPER_NOT_FOUND: 'Developer not found',
+  DEVELOPER_ACCOUNT_IS_DISABLED: 'Developer account is disabled',
+  REFRESH_TOKEN_REQUIRED_STRING: 'Refresh token required string',
+  INVALID_REFRESH_TOKEN: 'Invalid refresh token',
+  REFRESH_TOKEN_HAS_EXPIRED_PLEASE_LOG_IN_:
+    'Refresh token has expired. Please log in again.',
+  AUTHENTICATION_REQUIRED: 'Authentication required',
+  ACCESS_DENIED_ROLE_IS_INACTIVE: 'Access denied. Role is inactive.',
+  ACCESS_DENIED_REQUIRES_REQUIREDPERMISSIO:
+    "Access denied. Requires '${requiredPermission}' permission.",
+  ERROR_CHECKING_PERMISSIONS: 'Error checking permissions',
+  ROLE_ID_IS_REQUIRED: 'Role ID is required',
+  ROLE_IS_ASSIGNED_TO_ADMINS: 'Role is assigned to admins',
+  ROLE_IS_ASSIGNED_TO_USERS: 'Role is assigned to users',
 };

@@ -19,7 +19,11 @@ userRoutes.post('/login', UserController.login);
 userRoutes.post('/verify-login-otp', UserController.verifyLoginOtp);
 
 // Token Management
-userRoutes.post('/refresh-token', refreshTokenAuth, UserController.refreshToken);
+userRoutes.post(
+  '/refresh-token',
+  refreshTokenAuth,
+  UserController.refreshToken
+);
 userRoutes.post('/logout', refreshTokenAuth, UserController.logout);
 
 userRoutes.post('/forgot-password', UserController.forgotPassword);

@@ -2,7 +2,8 @@ import { StatusCodes } from 'http-status-codes';
 import { responseMessage } from '../utils/ResponseMessage.js';
 import Logger from '../utils/Logger.js';
 import User from '../models/user/User.js';
-import Admin from '../models/admin/Admin.js';
+import SchoolAdmin from '../models/admin/SchoolAdmin.js';
+import DeveloperAdmin from '../models/developer/DeveloperAdmin.js';
 import { verifyToken } from '../services/TokenService.js';
 import {
   CatchErrorHandler,
@@ -14,7 +15,10 @@ const logger = new Logger('src/middleware/Auth.js');
 
 //#region Extract Token Helper
 const extractToken = (req) => {
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer ')
+  ) {
     return req.headers.authorization.split(' ')[1];
   }
   return req.headers['auth'];
@@ -26,23 +30,43 @@ export const userAuth = async (req, res, next) => {
   try {
     const token = extractToken(req);
     if (!token) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, responseMessage.TOKEN_REQUIRED);
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.TOKEN_REQUIRED
+      );
     }
 
     const decodeToken = verifyToken(token, config.JWT_SECRET_KEY);
     if (!decodeToken || !decodeToken.id) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, responseMessage.INVALID_TOKEN);
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_TOKEN
+      );
     }
 
     const user = await User.findById(decodeToken.id);
     if (!user) {
-      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.USER_NOT_FOUND);
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.USER_NOT_FOUND
+      );
     }
     if (user.isDeleted) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, responseMessage.USER_ACCOUNT_DELETED || 'User account is deleted');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.USER_ACCOUNT_DELETED || 'User account is deleted'
+      );
     }
     if (!user.isActive) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, responseMessage.USER_NOT_ACTIVE);
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.USER_NOT_ACTIVE
+      );
     }
 
     req.user_id = user._id;
@@ -50,10 +74,18 @@ export const userAuth = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Access token has expired');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.ACCESS_TOKEN_HAS_EXPIRED
+      );
     }
     if (error.name === 'JsonWebTokenError') {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Invalid access token');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_ACCESS_TOKEN
+      );
     }
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -61,26 +93,45 @@ export const userAuth = async (req, res, next) => {
 };
 //#endregion
 
-//#region Admin Auth Middleware (Access Token)
+//#region SchoolAdmin Auth Middleware (Access Token)
 export const adminAuth = async (req, res, next) => {
   try {
     const token = extractToken(req);
     if (!token) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, responseMessage.TOKEN_REQUIRED);
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.TOKEN_REQUIRED
+      );
     }
 
     const decodeToken = verifyToken(token, config.JWT_SECRET_KEY);
     if (!decodeToken || !decodeToken.id) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, responseMessage.INVALID_TOKEN);
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_TOKEN
+      );
     }
 
-    const admin = await Admin.findOne({ _id: decodeToken.id, isDeleted: false });
+    const admin = await SchoolAdmin.findOne({
+      _id: decodeToken.id,
+      isDeleted: false,
+    });
     if (!admin) {
-      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ADMIN_NOT_FOUND
+      );
     }
 
     if (!admin.isActive) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Admin account is disabled');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.ADMIN_ACCOUNT_IS_DISABLED
+      );
     }
 
     // ✅ IMPORTANT CHANGE
@@ -91,10 +142,86 @@ export const adminAuth = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Access token has expired');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.ACCESS_TOKEN_HAS_EXPIRED
+      );
     }
     if (error.name === 'JsonWebTokenError') {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Invalid access token');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_ACCESS_TOKEN
+      );
+    }
+    logger.error(error);
+    return CatchErrorHandler(res, error);
+  }
+};
+//#endregion
+
+//#region DeveloperAdmin Auth Middleware (Access Token)
+export const developerAuth = async (req, res, next) => {
+  try {
+    const token = extractToken(req);
+    if (!token) {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.TOKEN_REQUIRED
+      );
+    }
+
+    const decodeToken = verifyToken(token, config.JWT_SECRET_KEY);
+    if (!decodeToken || !decodeToken.id) {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_TOKEN
+      );
+    }
+
+    // Dynamic import to avoid circular dependency if any, though regular import is better.
+    // We already have standard imports at the top. We will just use the model.
+    const developer = await DeveloperAdmin.findOne({
+      _id: decodeToken.id,
+      isDeleted: false,
+    });
+    if (!developer) {
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.DEVELOPER_NOT_FOUND
+      );
+    }
+
+    if (!developer.isActive) {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.DEVELOPER_ACCOUNT_IS_DISABLED
+      );
+    }
+
+    req.developer_id = developer._id;
+    req.developer = developer;
+
+    next();
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.ACCESS_TOKEN_HAS_EXPIRED
+      );
+    }
+    if (error.name === 'JsonWebTokenError') {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_ACCESS_TOKEN
+      );
     }
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -106,14 +233,22 @@ export const adminAuth = async (req, res, next) => {
 export const refreshTokenAuth = async (req, res, next) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
-    
+
     if (!refreshToken) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Refresh token required string');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.REFRESH_TOKEN_REQUIRED_STRING
+      );
     }
 
     const decodeToken = verifyToken(refreshToken, config.JWT_REFRESH_SECRET);
     if (!decodeToken || !decodeToken.id) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Invalid refresh token');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_REFRESH_TOKEN
+      );
     }
 
     // Attach decoded data to request
@@ -122,10 +257,18 @@ export const refreshTokenAuth = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Refresh token has expired. Please log in again.');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.REFRESH_TOKEN_HAS_EXPIRED_PLEASE_LOG_IN_
+      );
     }
     logger.error('Refresh Token Error: ', error.message);
-    return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Invalid refresh token');
+    return ResponseHandler(
+      res,
+      StatusCodes.UNAUTHORIZED,
+      responseMessage.INVALID_REFRESH_TOKEN
+    );
   }
 };
 //#endregion

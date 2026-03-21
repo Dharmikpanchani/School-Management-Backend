@@ -12,8 +12,18 @@ import {
   sendRegisterVerificationEmail,
 } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
-import { generateOtp, storeOtp, verifyOtp, checkOtpRateLimit } from '../../services/OtpService.js';
-import { generateAccessToken, generateRefreshToken, setRefreshTokenCookie, clearRefreshTokenCookie } from '../../services/TokenService.js';
+import {
+  generateOtp,
+  storeOtp,
+  verifyOtp,
+  checkOtpRateLimit,
+} from '../../services/OtpService.js';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  setRefreshTokenCookie,
+  clearRefreshTokenCookie,
+} from '../../services/TokenService.js';
 
 const logger = new Logger('./src/controller/user/UserController.js');
 
@@ -28,11 +38,20 @@ export const createUser = async (req, res) => {
     });
 
     if (existingUser) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_ALREADY_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_ALREADY_EXIST
+      );
     }
 
     const rateLimit = await checkOtpRateLimit('user_signup', email);
-    if (rateLimit.limited) return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+    if (rateLimit.limited)
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
 
     const hashedPassword = await encryptPassword(password);
 
@@ -48,16 +67,21 @@ export const createUser = async (req, res) => {
 
     const otp = generateOtp();
     await storeOtp('user', email, otp);
-    
+
     if (email) {
       // Reusing email service, could be improved with dynamic template
-      await sendRegisterVerificationEmail(email, otp, "User"); 
+      await sendRegisterVerificationEmail(email, otp, 'User');
     }
 
-    return ResponseHandler(res, StatusCodes.CREATED, responseMessage.USER_SIGNUP_SUCCESSFULLY, { 
-      email: newUser.email, 
-      phoneNumber: newUser.phoneNumber 
-    });
+    return ResponseHandler(
+      res,
+      StatusCodes.CREATED,
+      responseMessage.USER_SIGNUP_SUCCESSFULLY,
+      {
+        email: newUser.email,
+        phoneNumber: newUser.phoneNumber,
+      }
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -71,14 +95,28 @@ export const verifySignup = async (req, res) => {
     const { email, otp } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
-    if (user.isVerify) return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'User already verified');
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
+    if (user.isVerify)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_ALREADY_VERIFIED
+      );
 
     const otpResult = await verifyOtp('user', email, otp);
     if (!otpResult.success) {
       if (otpResult.maxAttemptsReached && !user.isVerify) {
         await User.deleteOne({ _id: user._id });
-        return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Too many OTP attempts. Registration cancelled and data removed. Please register again.');
+        return ResponseHandler(
+          res,
+          StatusCodes.BAD_REQUEST,
+          responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE
+        );
       }
       return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
     }
@@ -101,26 +139,56 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email, isDeleted: false });
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.INVALID_CREDENTIALS);
+    if (!isPasswordValid)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.INVALID_CREDENTIALS
+      );
 
-    if (!user.isVerify) return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Please verify your account first');
-    if (!user.isActive) return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Your account is disabled');
+    if (!user.isVerify)
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.PLEASE_VERIFY_YOUR_ACCOUNT_FIRST
+      );
+    if (!user.isActive)
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.YOUR_ACCOUNT_IS_DISABLED
+      );
 
     // Rate Limit check for OTP
     const rateLimit = await checkOtpRateLimit('user_login', email);
-    if (rateLimit.limited) return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+    if (rateLimit.limited)
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
 
     // Send Login OTP
     const otp = generateOtp();
     await storeOtp('user_login', email, otp);
-    
-    // Abstracting email send
-    await sendRegisterVerificationEmail(email, otp, "User"); 
 
-    return ResponseHandler(res, StatusCodes.OK, 'Credentials verified. OTP sent to email to complete login.', { email });
+    // Abstracting email send
+    await sendRegisterVerificationEmail(email, otp, 'User');
+
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.CREDENTIALS_VERIFIED_OTP_SENT_TO_EMAIL_T,
+      { email }
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -134,10 +202,16 @@ export const verifyLoginOtp = async (req, res) => {
     const { email, otp } = req.body;
 
     const user = await User.findOne({ email, isDeleted: false });
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
 
     const otpResult = await verifyOtp('user_login', email, otp);
-    if (!otpResult.success) return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
+    if (!otpResult.success)
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
 
     const payload = { id: user._id, type: 'user' };
     const accessToken = generateAccessToken(payload);
@@ -148,10 +222,15 @@ export const verifyLoginOtp = async (req, res) => {
     const userData = user.toObject();
     delete userData.password;
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.USER_LOGIN_SUCCESSFULLY, {
-      accessToken,
-      user: userData,
-    });
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.USER_LOGIN_SUCCESSFULLY,
+      {
+        accessToken,
+        user: userData,
+      }
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -163,13 +242,22 @@ export const verifyLoginOtp = async (req, res) => {
 export const refreshToken = async (req, res) => {
   try {
     const { token_id, token_type } = req;
-    
-    if (token_type !== 'user') return ResponseHandler(res, StatusCodes.FORBIDDEN, 'Invalid token type');
+
+    if (token_type !== 'user')
+      return ResponseHandler(
+        res,
+        StatusCodes.FORBIDDEN,
+        responseMessage.INVALID_TOKEN_TYPE
+      );
 
     const user = await User.findById(token_id);
     if (!user || user.isDeleted || !user.isActive) {
       clearRefreshTokenCookie(res);
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Invalid or disabled account');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_OR_DISABLED_ACCOUNT
+      );
     }
 
     const payload = { id: user._id, type: 'user' };
@@ -178,9 +266,14 @@ export const refreshToken = async (req, res) => {
 
     setRefreshTokenCookie(res, newRefreshToken);
 
-    return ResponseHandler(res, StatusCodes.OK, 'Token refreshed successfully', {
-      accessToken: newAccessToken
-    });
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.TOKEN_REFRESHED_SUCCESSFULLY,
+      {
+        accessToken: newAccessToken,
+      }
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -192,7 +285,11 @@ export const refreshToken = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     clearRefreshTokenCookie(res);
-    return ResponseHandler(res, StatusCodes.OK, 'Logged out successfully');
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.LOGGED_OUT_SUCCESSFULLY
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -206,16 +303,30 @@ export const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     const user = await User.findOne({ email, isDeleted: false });
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
 
     const rateLimit = await checkOtpRateLimit('user_forgot', email);
-    if (rateLimit.limited) return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+    if (rateLimit.limited)
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
 
     const otp = generateOtp();
     await storeOtp('user_forgot', email, otp);
     await forgotPasswordOtpMail(email, otp);
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_SENT_SUCCESSFULLY);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.OTP_SENT_SUCCESSFULLY
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -229,10 +340,16 @@ export const verifyOtpAction = async (req, res) => {
     const { email, otp } = req.body;
 
     const user = await User.findOne({ email, isDeleted: false });
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
 
     const otpResult = await verifyOtp('user_forgot', email, otp);
-    if (!otpResult.success) return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
+    if (!otpResult.success)
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
 
     return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_VERIFIED);
   } catch (error) {
@@ -248,14 +365,28 @@ export const resetPassword = async (req, res) => {
     const { email, newPassword, confirmPassword } = req.body;
 
     const user = await User.findOne({ email, isDeleted: false });
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
 
-    if (newPassword !== confirmPassword) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.PASSWORD_NOT_MATCH);
+    if (newPassword !== confirmPassword)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.PASSWORD_NOT_MATCH
+      );
 
     user.password = await encryptPassword(newPassword);
     await user.save();
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.PASSWORD_RESET_SUCCESSFULLY);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.PASSWORD_RESET_SUCCESSFULLY
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -268,18 +399,42 @@ export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword, confirmPassword } = req.body;
     const user = await User.findOne({ _id: req.user_id, isDeleted: false });
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
 
     const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-    if (!isPasswordValid) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.INVALID_OLD_PASSWORD);
+    if (!isPasswordValid)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.INVALID_OLD_PASSWORD
+      );
 
-    if (oldPassword === newPassword) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.PASSWORD_ARE_SAME);
-    if (newPassword !== confirmPassword) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.PASSWORD_NOT_MATCH);
+    if (oldPassword === newPassword)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.PASSWORD_ARE_SAME
+      );
+    if (newPassword !== confirmPassword)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.PASSWORD_NOT_MATCH
+      );
 
     user.password = await encryptPassword(newPassword);
     await user.save();
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.PASSWORD_CHANGE_SUCCESSFULLY);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.PASSWORD_CHANGE_SUCCESSFULLY
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -293,9 +448,19 @@ export const profile = async (req, res) => {
     const user = await User.findOne({ _id: req.user_id, isDeleted: false })
       .select('-password')
       .lean();
-    if (!user) return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.USER_NOT_EXIST);
-    
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.PROFILE_FETCHED, user);
+    if (!user)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.USER_NOT_EXIST
+      );
+
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.PROFILE_FETCHED,
+      user
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -317,7 +482,12 @@ export const updateProfile = async (req, res) => {
       },
       { new: true }
     ).select('-password');
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.PROFILE_UPDATED, update);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.PROFILE_UPDATED,
+      update
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);

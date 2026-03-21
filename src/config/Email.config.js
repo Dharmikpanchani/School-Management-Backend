@@ -1,8 +1,8 @@
-import nodemailer from "nodemailer";
-import config from "./Index.js";
+import nodemailer from 'nodemailer';
+import config from './Index.js';
 
 const transporter = nodemailer.createTransport({
-  service: "gmail", // ✅ IMPORTANT
+  service: 'gmail', // ✅ IMPORTANT
   auth: {
     user: config.EMAIL_USER,
     pass: config.EMAIL_APP_PASS,
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 // debug
 transporter.verify((err) => {
   if (err) {
-    console.error("❌ Mail Error:", err);
+    console.error('❌ Mail Error:', err);
   }
 });
 

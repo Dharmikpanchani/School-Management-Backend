@@ -26,11 +26,20 @@ schoolRoutes.post(
 );
 
 // Protected Auth Routes
-schoolRoutes.post('/resend-otp', validator('schoolResendOtpSchema'), SchoolController.resendOtp);
-
+schoolRoutes.post(
+  '/resend-otp',
+  validator('schoolResendOtpSchema'),
+  SchoolController.resendOtp
+);
 
 // Fully protected Root school Routes (No RBAC Needed)
 adminRoutes.get('/school-profile', adminAuth, SchoolController.getProfile);
-adminRoutes.post('/school-update-profile', adminAuth, MediaUpload(), validator('schoolUpdateProfileSchema'), SchoolController.updateProfile);
+adminRoutes.post(
+  '/school-update-profile',
+  adminAuth,
+  MediaUpload(),
+  validator('schoolUpdateProfileSchema'),
+  SchoolController.updateProfile
+);
 
 export default schoolRoutes;

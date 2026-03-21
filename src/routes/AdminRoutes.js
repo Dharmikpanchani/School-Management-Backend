@@ -31,7 +31,11 @@ adminRoutes.post(
   AdminController.addEditAdminProfile
 );
 
-adminRoutes.post('/refresh-token', refreshTokenAuth, AdminController.refreshToken);
+adminRoutes.post(
+  '/refresh-token',
+  refreshTokenAuth,
+  AdminController.refreshToken
+);
 adminRoutes.post('/logout', refreshTokenAuth, AdminController.logout);
 
 adminRoutes.post(
@@ -50,7 +54,11 @@ adminRoutes.post(
   validator('adminForgotPasswordSchema'),
   AdminController.forgotPassword
 );
-adminRoutes.post('/verify-otp', validator('adminForgotPasswordSchema'), AdminController.verifyForgotPasswordOtp);
+adminRoutes.post(
+  '/verify-otp',
+  validator('adminForgotPasswordSchema'),
+  AdminController.verifyForgotPasswordOtp
+);
 adminRoutes.post(
   '/resend-forgot-otp',
   validator('adminForgotPasswordSchema'),
@@ -75,8 +83,18 @@ adminRoutes.patch(
   AdminController.updateProfile
 );
 
-adminRoutes.get('/get-all-admins',adminAuth, checkPermission(rolePermissionList.admin_users.read), AdminController.getAllAdmins);
-adminRoutes.delete('/delete-admin/:id', adminAuth, checkPermission(rolePermissionList.admin_users.delete), AdminController.deleteAdmin);
+adminRoutes.get(
+  '/get-all-admins',
+  adminAuth,
+  checkPermission(rolePermissionList.admin_users.read),
+  AdminController.getAllAdmins
+);
+adminRoutes.delete(
+  '/delete-admin/:id',
+  adminAuth,
+  checkPermission(rolePermissionList.admin_users.delete),
+  AdminController.deleteAdmin
+);
 adminRoutes.post(
   '/admin-action-status/:id',
   adminAuth,
@@ -127,6 +145,5 @@ adminRoutes.post(
   RoleManagementController.roleActionStatus
 );
 //#endregion
-
 
 export default adminRoutes;

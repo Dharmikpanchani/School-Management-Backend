@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const ReferralSchema = new mongoose.Schema(
+const SalesSchema = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -39,5 +39,5 @@ const ReferralSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Referral = mongoose.model('Referral', ReferralSchema);
-export default Referral;
+const Sales = mongoose.model('Sales', SalesSchema);
+export default Sales;

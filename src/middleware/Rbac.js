@@ -1,5 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { ResponseHandler } from '../services/CommonServices.js';
+import SchoolAdmin from '../models/admin/SchoolAdmin.js';
+import User from '../models/user/User.js';
 
 //#region Check Permission Middleware
 /**
@@ -9,16 +11,20 @@ import { ResponseHandler } from '../services/CommonServices.js';
 export const checkPermission = (requiredPermission) => {
   return async (req, res, next) => {
     try {
-      // Admins are attached to req.admin, Users to req.user (by Auth.js)
-      const userOrAdmin = req.admin || req.user;
+      // Admins attached to req.admin, Users to req.user, Developers to req.developer
+      const userOrAdmin = req.admin || req.user || req.developer;
 
-      // Ensure the user/admin was properly loaded
+      // Ensure the user/admin/developer was properly loaded
       if (!userOrAdmin) {
-        return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Authentication required');
+        return ResponseHandler(
+          res,
+          StatusCodes.UNAUTHORIZED,
+          responseMessage.AUTHENTICATION_REQUIRED
+        );
       }
 
-      // If user is a super admin, bypass checks
-      if (userOrAdmin.isSuperAdmin) {
+      // If user is a super admin or super developer, bypass checks
+      if (userOrAdmin.isSuperAdmin || userOrAdmin.isSuperDeveloper) {
         return next();
       }
 
@@ -30,7 +36,11 @@ export const checkPermission = (requiredPermission) => {
       const role = userOrAdmin.role;
 
       if (!role.isActive) {
-        return ResponseHandler(res, StatusCodes.FORBIDDEN, 'Access denied. Role is inactive.');
+        return ResponseHandler(
+          res,
+          StatusCodes.FORBIDDEN,
+          responseMessage.ACCESS_DENIED_ROLE_IS_INACTIVE
+        );
       }
 
       const hasExactPermission = role.permissions.includes(requiredPermission);
@@ -39,14 +49,21 @@ export const checkPermission = (requiredPermission) => {
         return next();
       }
 
-      return ResponseHandler(res, StatusCodes.FORBIDDEN, `Access denied. Requires '${requiredPermission}' permission.`);
+      return ResponseHandler(
+        res,
+        StatusCodes.FORBIDDEN,
+        responseMessage.ACCESS_DENIED_REQUIRES_REQUIREDPERMISSIO
+      );
     } catch (error) {
-      return ResponseHandler(res, StatusCodes.INTERNAL_SERVER_ERROR, 'Error checking permissions');
+      return ResponseHandler(
+        res,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        responseMessage.ERROR_CHECKING_PERMISSIONS
+      );
     }
   };
 };
 //#endregion
-
 
 //#region Check Role In Use Middleware
 export const checkRoleInUse = async (req, res, next) => {
@@ -54,17 +71,32 @@ export const checkRoleInUse = async (req, res, next) => {
     const { id } = req.params;
 
     if (!id) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Role ID is required');
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.ROLE_ID_IS_REQUIRED
+      );
     }
 
-    const adminExists = await Admin.exists({ role: id, isDeleted: false });
+    const adminExists = await SchoolAdmin.exists({
+      role: id,
+      isDeleted: false,
+    });
     if (adminExists) {
-      return ResponseHandler(res, StatusCodes.CONFLICT, 'Role is assigned to admins');
+      return ResponseHandler(
+        res,
+        StatusCodes.CONFLICT,
+        responseMessage.ROLE_IS_ASSIGNED_TO_ADMINS
+      );
     }
 
     const userExists = await User.exists({ role: id, isDeleted: false });
     if (userExists) {
-      return ResponseHandler(res, StatusCodes.CONFLICT, 'Role is assigned to users');
+      return ResponseHandler(
+        res,
+        StatusCodes.CONFLICT,
+        responseMessage.ROLE_IS_ASSIGNED_TO_USERS
+      );
     }
 
     next();

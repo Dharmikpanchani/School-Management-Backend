@@ -72,7 +72,9 @@ const SchoolSchema = new mongoose.Schema(
 // Pre-save hook to generate unique school code if not present
 SchoolSchema.pre('save', async function (next) {
   if (!this.schoolCode) {
-    const code = this.schoolName.substring(0, 3).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const code =
+      this.schoolName.substring(0, 3).toUpperCase() +
+      Math.random().toString(36).substring(2, 6).toUpperCase();
     this.schoolCode = code;
   }
   next();

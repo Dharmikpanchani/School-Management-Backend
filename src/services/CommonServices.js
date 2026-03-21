@@ -29,16 +29,26 @@ export function ResponseHandler(res, status, message, data) {
  * @param {Array<string>} keysToRemove - Keys to remove (e.g. ['password', '__v'])
  * @returns {Object} Cleaned Object
  */
-export function filterData(data, keysToRemove = ['password', '__v', 'otp', 'otpExpireAt', 'referralId', 'createdAt']) {
+export function filterData(
+  data,
+  keysToRemove = [
+    'password',
+    '__v',
+    'otp',
+    'otpExpireAt',
+    'referralId',
+    'createdAt',
+  ]
+) {
   if (!data) return null;
-  
+
   // Convert mongoose documents to plain JSON if needed
   let result = data.toObject ? data.toObject() : { ...data };
-  
+
   keysToRemove.forEach((key) => {
     delete result[key];
   });
-  
+
   return result;
 }
 //#endregion

@@ -1,4 +1,4 @@
-import Admin from '../../models/admin/Admin.js';
+import SchoolAdmin from '../../models/admin/SchoolAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import {
   ResponseHandler,
@@ -7,11 +7,25 @@ import {
 } from '../../services/CommonServices.js';
 import bcrypt from 'bcryptjs';
 import { StatusCodes } from 'http-status-codes';
-import { forgotPasswordOtpMail, sendRegisterVerificationEmail, sendSubscriptionBaseMail } from '../../services/EmailServices.js';
+import {
+  forgotPasswordOtpMail,
+  sendRegisterVerificationEmail,
+  sendSubscriptionBaseMail,
+} from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
 import RoleManagement from '../../models/admin/RolePermission.js';
-import { generateOtp, storeOtp, verifyOtp, checkOtpRateLimit } from '../../services/OtpService.js';
-import { generateAccessToken, generateRefreshToken, setRefreshTokenCookie, clearRefreshTokenCookie } from '../../services/TokenService.js';
+import {
+  generateOtp,
+  storeOtp,
+  verifyOtp,
+  checkOtpRateLimit,
+} from '../../services/OtpService.js';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  setRefreshTokenCookie,
+  clearRefreshTokenCookie,
+} from '../../services/TokenService.js';
 import School from '../../models/school/School.js';
 
 const { filterData } = await import('../../services/CommonServices.js');
@@ -22,24 +36,48 @@ export const login = async (req, res) => {
     const { email, password, schoolCode } = req.body;
     const findSchool = await School.findOne({ schoolCode, isDeleted: false });
     if (!findSchool) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.SCHOOL_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.SCHOOL_NOT_EXIST
+      );
     }
-    const admin = await Admin.findOne({ email, isDeleted: false, schoolId: findSchool._id }).populate('role');
+    const admin = await SchoolAdmin.findOne({
+      email,
+      isDeleted: false,
+      schoolId: findSchool._id,
+    }).populate('role');
     if (!admin) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.ADMIN_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.ADMIN_NOT_EXIST
+      );
     }
 
     if (!admin.isVerified) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Account not verified. Please verify OTP.');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.ACCOUNT_NOT_VERIFIED_PLEASE_VERIFY_OTP
+      );
     }
 
     if (!admin.isActive) {
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Account is disabled.');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.ACCOUNT_IS_DISABLED
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.INVALID_CREDENTIALS);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.INVALID_CREDENTIALS
+      );
     }
 
     const payload = { id: admin._id, type: 'admin' };
@@ -51,9 +89,14 @@ export const login = async (req, res) => {
     const adminData = admin.toObject();
     delete adminData.password;
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.ADMIN_LOGIN_SUCCESSFULLY, {
-      accessToken,
-    });
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
+      {
+        accessToken,
+      }
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -63,15 +106,23 @@ export const login = async (req, res) => {
 export const refreshToken = async (req, res) => {
   try {
     const { token_id, token_type } = req;
-    
+
     if (token_type !== 'admin') {
-      return ResponseHandler(res, StatusCodes.FORBIDDEN, 'Invalid token type');
+      return ResponseHandler(
+        res,
+        StatusCodes.FORBIDDEN,
+        responseMessage.INVALID_TOKEN_TYPE
+      );
     }
 
-    const admin = await Admin.findById(token_id);
+    const admin = await SchoolAdmin.findById(token_id);
     if (!admin || admin.isDeleted || !admin.isActive) {
       clearRefreshTokenCookie(res);
-      return ResponseHandler(res, StatusCodes.UNAUTHORIZED, 'Invalid or disabled account');
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        responseMessage.INVALID_OR_DISABLED_ACCOUNT
+      );
     }
 
     const payload = { id: admin._id, type: 'admin' };
@@ -80,9 +131,14 @@ export const refreshToken = async (req, res) => {
 
     setRefreshTokenCookie(res, newRefreshToken);
 
-    return ResponseHandler(res, StatusCodes.OK, 'Token refreshed successfully', {
-      accessToken: newAccessToken
-    });
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.TOKEN_REFRESHED_SUCCESSFULLY,
+      {
+        accessToken: newAccessToken,
+      }
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -92,7 +148,11 @@ export const refreshToken = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     clearRefreshTokenCookie(res);
-    return ResponseHandler(res, StatusCodes.OK, 'Logged out successfully');
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.LOGGED_OUT_SUCCESSFULLY
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -104,18 +164,34 @@ export const forgotPassword = async (req, res) => {
     const { email, schoolCode } = req.body;
     const findSchool = await School.findOne({ schoolCode, isDeleted: false });
     if (!findSchool) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.SCHOOL_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.SCHOOL_NOT_EXIST
+      );
     }
 
-    const admin = await Admin.findOne({ email, isDeleted: false, schoolId: findSchool._id });
+    const admin = await SchoolAdmin.findOne({
+      email,
+      isDeleted: false,
+      schoolId: findSchool._id,
+    });
     if (!admin) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.ADMIN_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.ADMIN_NOT_EXIST
+      );
     }
 
     // Rate limit check
     const rateLimit = await checkOtpRateLimit('admin_forgot', email);
     if (rateLimit.limited) {
-      return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
     }
 
     // Generate & store OTP via Redis (same as admin creation flow)
@@ -124,7 +200,12 @@ export const forgotPassword = async (req, res) => {
 
     await forgotPasswordOtpMail(email, otp);
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_SENT_SUCCESSFULLY, null);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.OTP_SENT_SUCCESSFULLY,
+      null
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -136,11 +217,23 @@ export const verifyForgotPasswordOtp = async (req, res) => {
     const { email, otp, schoolCode } = req.body;
     const findSchool = await School.findOne({ schoolCode, isDeleted: false });
     if (!findSchool) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.SCHOOL_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.SCHOOL_NOT_EXIST
+      );
     }
-    const admin = await Admin.findOne({ email, isDeleted: false, schoolId: findSchool._id });
+    const admin = await SchoolAdmin.findOne({
+      email,
+      isDeleted: false,
+      schoolId: findSchool._id,
+    });
     if (!admin) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.ADMIN_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.ADMIN_NOT_EXIST
+      );
     }
 
     // Verify OTP via Redis (same service used across the app)
@@ -161,12 +254,16 @@ export const resetPassword = async (req, res) => {
     const { email, newPassword, confirmPassword, schoolCode } = req.body;
     const findSchool = await School.findOne({ schoolCode, isDeleted: false });
     if (!findSchool) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.SCHOOL_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.SCHOOL_NOT_EXIST
+      );
     }
-    const admin = await Admin.findOne({
+    const admin = await SchoolAdmin.findOne({
       email,
       isDeleted: false,
-      schoolId: findSchool._id
+      schoolId: findSchool._id,
     });
     if (!admin) {
       return ResponseHandler(
@@ -203,9 +300,17 @@ export const changePassword = async (req, res) => {
     const { oldPassword, newPassword, confirmPassword } = req.body;
     const findSchool = await School.findOne({ schoolCode, isDeleted: false });
     if (!findSchool) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.SCHOOL_NOT_EXIST);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.SCHOOL_NOT_EXIST
+      );
     }
-    const admin = await Admin.findOne({ _id: req.admin_id, isDeleted: false, schoolId: req.school_id });
+    const admin = await SchoolAdmin.findOne({
+      _id: req.admin_id,
+      isDeleted: false,
+      schoolId: req.school_id,
+    });
     if (!admin) {
       return ResponseHandler(
         res,
@@ -252,16 +357,22 @@ export const changePassword = async (req, res) => {
 
 export const profile = async (req, res) => {
   try {
-    const admin = await Admin.findOne({
+    const admin = await SchoolAdmin.findOne({
       _id: req.admin_id,
       isDeleted: false,
-    }).populate('role').populate({
-      path: 'schoolId',
-      select: '-referralId -__v'
-    });
+    })
+      .populate('role')
+      .populate({
+        path: 'schoolId',
+        select: '-referralId -__v',
+      });
 
     if (!admin) {
-      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ADMIN_NOT_FOUND
+      );
     }
 
     const responseData = {
@@ -270,7 +381,12 @@ export const profile = async (req, res) => {
       schoolData: admin.schoolId,
     };
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.PROFILE_FETCHED, responseData);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.PROFILE_FETCHED,
+      responseData
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -280,7 +396,7 @@ export const profile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { name, email, phoneNumber } = req.body;
-    const update = await Admin.findOneAndUpdate(
+    const update = await SchoolAdmin.findOneAndUpdate(
       { _id: req.admin_id },
       {
         name,
@@ -303,14 +419,14 @@ export const updateProfile = async (req, res) => {
 };
 //#endregion
 
-//#region ➕ Add / ✏️ Edit Admin Profile
+//#region ➕ Add / ✏️ Edit SchoolAdmin Profile
 export const addEditAdminProfile = async (req, res) => {
   try {
     const { id, name, email, password, role, schoolId, address } = req.body;
-    
+
     // Multi-tenant: If creator is a tenant admin, lock new admin to same school
     const assignedSchoolId = req.admin?.schoolId || schoolId;
-    
+
     const payload = { name, email, schoolId: assignedSchoolId, address };
 
     if (password) {
@@ -322,37 +438,88 @@ export const addEditAdminProfile = async (req, res) => {
 
     let result;
     if (id) {
-      const existingAdmin = await Admin.findOne({ _id: id, isDeleted: false });
-      if (!existingAdmin) return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
+      const existingAdmin = await SchoolAdmin.findOne({
+        _id: id,
+        isDeleted: false,
+      });
+      if (!existingAdmin)
+        return ResponseHandler(
+          res,
+          StatusCodes.NOT_FOUND,
+          responseMessage.ADMIN_NOT_FOUND
+        );
 
-      const duplicateAdmin = await Admin.findOne({ _id: { $ne: id }, $or: [{ email }], isDeleted: false });
-      if (duplicateAdmin) return ResponseHandler(res, StatusCodes.CONFLICT, responseMessage.ADMIN_ALREADY_EXISTS);
+      const duplicateAdmin = await SchoolAdmin.findOne({
+        _id: { $ne: id },
+        $or: [{ email }],
+        isDeleted: false,
+      });
+      if (duplicateAdmin)
+        return ResponseHandler(
+          res,
+          StatusCodes.CONFLICT,
+          responseMessage.ADMIN_ALREADY_EXISTS
+        );
 
-      result = await Admin.findByIdAndUpdate(id, payload, { new: true });
-      return ResponseHandler(res, StatusCodes.OK, responseMessage.PROFILE_UPDATED, result);
+      result = await SchoolAdmin.findByIdAndUpdate(id, payload, { new: true });
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.PROFILE_UPDATED,
+        result
+      );
     } else {
       // Create flow
-      const duplicateAdmin = await Admin.findOne({ email, schoolId: req.school_id, isDeleted: false });
-      if (duplicateAdmin) return ResponseHandler(res, StatusCodes.CONFLICT, responseMessage.ADMIN_ALREADY_EXISTS);
+      const duplicateAdmin = await SchoolAdmin.findOne({
+        email,
+        schoolId: req.school_id,
+        isDeleted: false,
+      });
+      if (duplicateAdmin)
+        return ResponseHandler(
+          res,
+          StatusCodes.CONFLICT,
+          responseMessage.ADMIN_ALREADY_EXISTS
+        );
 
       // Require password for new admins
-      if (!password) return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Password is required to create a new admin');
+      if (!password)
+        return ResponseHandler(
+          res,
+          StatusCodes.BAD_REQUEST,
+          responseMessage.PASSWORD_IS_REQUIRED_TO_CREATE_A_NEW_ADM
+        );
 
       // Rate limit check
       const rateLimit = await checkOtpRateLimit('admin', email);
-      if (rateLimit.limited) return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+      if (rateLimit.limited)
+        return ResponseHandler(
+          res,
+          StatusCodes.TOO_MANY_REQUESTS,
+          rateLimit.message
+        );
 
-      // Create Unverified Admin
+      // Create Unverified SchoolAdmin
       payload.isVerified = false;
-      result = await Admin.create(payload);
+      result = await SchoolAdmin.create(payload);
 
       // Send OTP
       const otp = generateOtp();
       await storeOtp('admin', email, otp);
-      sendRegisterVerificationEmail(`Your Admin Register OTP is: ${otp}`, email, "Admin")
-        .catch(err => console.error(`Error sending Admin Registration OTP: ${err}`));
+      sendRegisterVerificationEmail(
+        `Your SchoolAdmin Register OTP is: ${otp}`,
+        email,
+        'SchoolAdmin'
+      ).catch((err) =>
+        console.error(`Error sending SchoolAdmin Registration OTP: ${err}`)
+      );
 
-      return ResponseHandler(res, StatusCodes.CREATED, 'Admin created. OTP sent to email for verification.', { adminId: result._id, email });
+      return ResponseHandler(
+        res,
+        StatusCodes.CREATED,
+        responseMessage.ADMIN_CREATED_OTP_SENT_TO_EMAIL_FOR_VERI,
+        { adminId: result._id, email }
+      );
     }
   } catch (error) {
     logger.error(error);
@@ -361,19 +528,37 @@ export const addEditAdminProfile = async (req, res) => {
 };
 //#endregion
 
-//#region Verify Admin Registration OTP
+//#region Verify SchoolAdmin Registration OTP
 export const verifyAdminRegistrationOtp = async (req, res) => {
   try {
     const { email, otp, school_id } = req.body;
-    const admin = await Admin.findOne({ email, isDeleted: false, schoolId: school_id });
-    if (!admin) return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
-    if (admin.isVerified) return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Admin already verified');
+    const admin = await SchoolAdmin.findOne({
+      email,
+      isDeleted: false,
+      schoolId: school_id,
+    });
+    if (!admin)
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ADMIN_NOT_FOUND
+      );
+    if (admin.isVerified)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.ADMIN_ALREADY_VERIFIED
+      );
 
     const otpResult = await verifyOtp('admin', email, otp);
     if (!otpResult.success) {
       if (otpResult.maxAttemptsReached && !admin.isVerified) {
-        await Admin.deleteOne({ _id: admin._id });
-        return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Too many OTP attempts. Registration cancelled and data removed. Please register again.');
+        await SchoolAdmin.deleteOne({ _id: admin._id });
+        return ResponseHandler(
+          res,
+          StatusCodes.BAD_REQUEST,
+          responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE
+        );
       }
       return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
     }
@@ -382,7 +567,11 @@ export const verifyAdminRegistrationOtp = async (req, res) => {
     admin.isActive = true;
     await admin.save();
 
-    return ResponseHandler(res, StatusCodes.OK, 'Admin verified successfully. You can now login.');
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -395,20 +584,49 @@ export const resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const admin = await Admin.findOne({ email, isDeleted: false, schoolId: req.school_id });
-    if (!admin) return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
-    if (admin.isVerified) return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Admin is already verified. No OTP needed.');
+    const admin = await SchoolAdmin.findOne({
+      email,
+      isDeleted: false,
+      schoolId: req.school_id,
+    });
+    if (!admin)
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ADMIN_NOT_FOUND
+      );
+    if (admin.isVerified)
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.ADMIN_IS_ALREADY_VERIFIED_NO_OTP_NEEDED
+      );
 
     // Rate limit check before sending a new OTP
     const rateLimit = await checkOtpRateLimit('admin', email);
-    if (rateLimit.limited) return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+    if (rateLimit.limited)
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
 
     const otp = generateOtp();
     await storeOtp('admin', email, otp);
-    sendRegisterVerificationEmail(`Your Admin Register OTP is: ${otp}`, email, 'Admin')
-      .catch(err => console.error(`Error re-sending Admin Registration OTP: ${err}`));
+    sendRegisterVerificationEmail(
+      `Your SchoolAdmin Register OTP is: ${otp}`,
+      email,
+      'SchoolAdmin'
+    ).catch((err) =>
+      console.error(`Error re-sending SchoolAdmin Registration OTP: ${err}`)
+    );
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_SENT_SUCCESSFULLY, null);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.OTP_SENT_SUCCESSFULLY,
+      null
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -421,12 +639,26 @@ export const resendForgotPasswordOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const admin = await Admin.findOne({ email, isDeleted: false, schoolId: req.school_id });
-    if (!admin) return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.ADMIN_NOT_FOUND);
+    const admin = await SchoolAdmin.findOne({
+      email,
+      isDeleted: false,
+      schoolId: req.school_id,
+    });
+    if (!admin)
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ADMIN_NOT_FOUND
+      );
 
     // Rate limit check
     const rateLimit = await checkOtpRateLimit('admin_forgot', email);
-    if (rateLimit.limited) return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+    if (rateLimit.limited)
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
 
     // Generate & store fresh OTP in Redis (forgot namespace)
     const otp = generateOtp();
@@ -434,7 +666,12 @@ export const resendForgotPasswordOtp = async (req, res) => {
 
     await forgotPasswordOtpMail(email, otp);
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_SENT_SUCCESSFULLY, null);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.OTP_SENT_SUCCESSFULLY,
+      null
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -447,7 +684,7 @@ export const getAllAdmins = async (req, res) => {
   try {
     const { pageNumber = 1, perPageData, searchRequest } = req.query;
     const query = { isDeleted: false };
-    
+
     // Multi-tenant Isolation: Filter by school if the requesting admin belongs to one
     if (req.admin?.schoolId) {
       query.schoolId = req.admin.schoolId;
@@ -468,19 +705,19 @@ export const getAllAdmins = async (req, res) => {
     }
 
     // Pagination setup
-    const totalArrayLength = await Admin.countDocuments(query);
+    const totalArrayLength = await SchoolAdmin.countDocuments(query);
     const page = parseInt(pageNumber);
     const limit = parseInt(perPageData || totalArrayLength);
     const skip = (page - 1) * limit;
 
     // Fetch admins with populate
-    const adminData = await Admin.find(query)
+    const adminData = await SchoolAdmin.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate('role');
 
-    const data = adminData.map(admin => filterData(admin));
+    const data = adminData.map((admin) => filterData(admin));
     return ResponseHandler(
       res,
       StatusCodes.OK,
@@ -489,7 +726,7 @@ export const getAllAdmins = async (req, res) => {
         totalArrayLength,
         pageNumber: page,
         perPageData: limit,
-        data
+        data,
       }
     );
   } catch (error) {
@@ -499,10 +736,10 @@ export const getAllAdmins = async (req, res) => {
 };
 //#endregion
 
-//#region 🗑️ Delete Admin (Soft Delete)
+//#region 🗑️ Delete SchoolAdmin (Soft Delete)
 export const deleteAdmin = async (req, res) => {
   try {
-    const admin = await Admin.findOneAndUpdate(
+    const admin = await SchoolAdmin.findOneAndUpdate(
       { _id: req.params.id, isDeleted: false },
       { isDeleted: true },
       { new: true }
@@ -529,12 +766,12 @@ export const deleteAdmin = async (req, res) => {
 };
 //#endregion
 
-//#region ⚡ Admin Status Handler (Toggle Active)
+//#region ⚡ SchoolAdmin Status Handler (Toggle Active)
 export const adminStatusHandler = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const admin = await Admin.findOne({ _id: id, isDeleted: false });
+    const admin = await SchoolAdmin.findOne({ _id: id, isDeleted: false });
 
     if (!admin) {
       return ResponseHandler(
@@ -544,7 +781,7 @@ export const adminStatusHandler = async (req, res) => {
       );
     }
 
-    const updatedAdmin = await Admin.findByIdAndUpdate(
+    const updatedAdmin = await SchoolAdmin.findByIdAndUpdate(
       id,
       { isActive: !admin.isActive },
       { new: true }

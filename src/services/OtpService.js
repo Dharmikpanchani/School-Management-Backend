@@ -41,12 +41,19 @@ export const verifyOtp = async (type, identifier, inputOtp) => {
   const attempts = await redis.incr(attemptsKey);
   if (attempts > MAX_ATTEMPTS) {
     await deleteOtp(type, identifier);
-    return { success: false, message: 'Too many OTP attempts. Please request a new OTP.', maxAttemptsReached: true };
+    return {
+      success: false,
+      message: 'Too many OTP attempts. Please request a new OTP.',
+      maxAttemptsReached: true,
+    };
   }
 
   if (storedOtp !== inputOtp.toString()) {
     const remaining = MAX_ATTEMPTS - attempts;
-    return { success: false, message: `Invalid OTP. ${remaining} attempts remaining.` };
+    return {
+      success: false,
+      message: `Invalid OTP. ${remaining} attempts remaining.`,
+    };
   }
 
   // OTP matched — delete from Redis

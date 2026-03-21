@@ -9,14 +9,14 @@ import transporter from '../config/Email.config.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function sendRegisterVerificationEmail(otp,email, type ) {
+export async function sendRegisterVerificationEmail(otp, email, type) {
   try {
     const templatePath = path.join(__dirname, '../views/Register.ejs');
 
     const emailTemplate = await ejs.renderFile(templatePath, { otp, type });
 
     const mailOptions = {
-    from: `"${type} App" <${config.EMAIL_FROM}>`, // ✅ fix
+      from: `"${type} App" <${config.EMAIL_FROM}>`, // ✅ fix
       to: email,
       subject: `${type} Register OTP Notification`,
       html: emailTemplate,
@@ -77,14 +77,12 @@ export async function sendSubscriptionBaseMail(description, email) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("info", info)
+    console.log('info', info);
     if (!info?.messageId) {
       throw new Error('Failed to send subscription email');
     }
 
-    logger.info(
-      `Subscription email sent successfully to: ${email}`
-    );
+    logger.info(`Subscription email sent successfully to: ${email}`);
     return { success: true, message: 'Subscription email sent successfully' };
   } catch (error) {
     logger.error(`Error sending subscription email: ${error}`);
