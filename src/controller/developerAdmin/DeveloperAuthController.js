@@ -30,8 +30,6 @@ const logger = new Logger(
   './src/controller/developerAdmin/DeveloperAuthController.js'
 );
 
-
-
 //#region Login
 export const login = async (req, res) => {
   try {

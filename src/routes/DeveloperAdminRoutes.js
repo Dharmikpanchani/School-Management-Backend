@@ -18,8 +18,6 @@ developerRoutes.use('/verify-email', authLimiter);
 developerRoutes.use('/re-send-otp', authLimiter);
 developerRoutes.use('/resend-forgot-otp', authLimiter);
 
-
-
 developerRoutes.post(
   '/login',
   validator('developerLoginSchema'),
