@@ -42,7 +42,7 @@ export const checkPermission = (requiredPermission) => {
 
       const role = userOrAdmin.role;
 
-      if (!role.isActive) {
+      if (!role?.isActive) {
         return ResponseHandler(
           res,
           StatusCodes.FORBIDDEN,
@@ -50,7 +50,7 @@ export const checkPermission = (requiredPermission) => {
         );
       }
 
-      const hasExactPermission = role.permissions.includes(requiredPermission);
+      const hasExactPermission = role?.permissions?.includes(requiredPermission);
 
       if (hasExactPermission) {
         return next();

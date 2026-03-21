@@ -123,16 +123,7 @@ export const register = async (req, res) => {
       'School'
     ).catch((err) => logger.error(err));
 
-    // 7. Referral Update
     if (existingReferral) {
-      existingReferral.schools.push({
-        schoolId: newSchool._id,
-        schoolName: newSchool.schoolName,
-        schoolEmailId: newSchool.email,
-        schoolPhoneNumber: newSchool.phoneNumber,
-      });
-      await existingReferral.save();
-
       // ✅ 🔥 SEND MAIL TO REFERRAL OWNER
       sendSubscriptionBaseMail(
         `The school "${newSchool.schoolName}" has successfully registered using your referral.`,
@@ -352,8 +343,8 @@ export const updateProfile = async (req, res) => {
     if (country !== undefined) school.country = country;
 
     // Check if the logo was sent as a file
-    if (req.files && req.files.logo && req.files.logo.length > 0) {
-      school.logo = req.files.logo[0].filename;
+    if (req?.files?.logo?.length > 0) {
+      school.logo = req.files.logo[0]?.filename;
     } else if (logo !== undefined) {
       // Or fallback to plain text if directly sent
       school.logo = logo;
