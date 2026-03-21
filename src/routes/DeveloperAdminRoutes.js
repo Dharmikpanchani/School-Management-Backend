@@ -14,16 +14,11 @@ const developerRoutes = Router();
 
 //#region Auth & Profile Management
 developerRoutes.use('/login', authLimiter);
-developerRoutes.use('/register', authLimiter);
 developerRoutes.use('/verify-email', authLimiter);
 developerRoutes.use('/re-send-otp', authLimiter);
 developerRoutes.use('/resend-forgot-otp', authLimiter);
 
-developerRoutes.post(
-  '/register',
-  validator('developerRegisterSchema'),
-  DeveloperAuthController.register
-);
+
 
 developerRoutes.post(
   '/login',

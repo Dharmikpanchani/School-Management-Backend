@@ -562,23 +562,6 @@ const developerUpdateProfileSchema = joi.object({
   image: joistring.optional().allow('').label('Image'),
 });
 
-const developerRegisterSchema = joi.object({
-  name: joistring.required().label('Name'),
-  email: joistring.email().required().label('Email'),
-  phoneNumber: joistring.optional().label('Phone number'),
-  password: joiPassword
-    .string()
-    .min(8)
-    .minOfUppercase(1)
-    .minOfLowercase(1)
-    .minOfNumeric(1)
-    .minOfSpecialCharacters(1)
-    .noWhiteSpaces()
-    .required()
-    .label('Password'),
-  address: joistring.optional().allow('').label('Address'),
-});
-
 export default {
   adminLoginSchema,
   changePasswordSchema,
@@ -606,5 +589,4 @@ export default {
   developerResetPasswordSchema,
   developerVerifyRegistrationOtpSchema,
   developerUpdateProfileSchema,
-  developerRegisterSchema,
 };
