@@ -40,11 +40,6 @@ export const addEditRole = async (req, res) => {
       );
     }
 
-    const payload = {
-      role: role?.trim(),
-      permissions: parsedPermissions,
-    };
-
     let result;
 
     if (id) {
@@ -53,6 +48,9 @@ export const addEditRole = async (req, res) => {
         isDeleted: false,
       });
 
+      const payload = {
+        permissions: parsedPermissions,
+      };
       if (!existingRole) {
         return ResponseHandler(
           res,
@@ -85,6 +83,10 @@ export const addEditRole = async (req, res) => {
         result
       );
     } else {
+      const payload = {
+        role: role?.trim(),
+        permissions: parsedPermissions,
+      };
       // Global DeveloperAdmin implementation ensures no tenant restriction on roles created
       const duplicate = await RoleManagement.findOne({
         role: payload.role,

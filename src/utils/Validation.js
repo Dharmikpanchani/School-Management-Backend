@@ -367,6 +367,7 @@ const schoolRegisterSchema = joi.object({
   email: joistring.email().required().label('Email'),
   phoneNumber: joistring.required().label('Phone number'),
   schoolCode: joistring.required().label('School code'),
+  referralId: joistring.optional().allow('').label('Referral ID'),
   password: joiPassword
     .string()
     .min(8)
@@ -377,14 +378,6 @@ const schoolRegisterSchema = joi.object({
     .noWhiteSpaces()
     .required()
     .label('Password'),
-  referral: joi
-    .object({
-      email: joistring.email().required(),
-      number: joistring.required(),
-      upiId: joistring.optional().allow(''),
-    })
-    .optional()
-    .label('Referral'),
 });
 
 const schoolVerifyEmailSchema = joi.object({
