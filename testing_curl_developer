@@ -1,53 +1,15 @@
 
-# 16. GET ALL ADMINS (Requires Auth, supports pagination & search)
-
-# 17. TOGGLE ADMIN STATUS (Active/Inactive)
-curl -X POST {{URL}}/api/developer/admin-action-status/ADMIN_OBJECT_ID \
-  -H "Authorization: Bearer {{TOKEN}}"
-
-# 18. DELETE ADMIN (Soft Delete)
-curl -X DELETE {{URL}}/api/developer/delete-admin/ADMIN_OBJECT_ID \
-  -H "Authorization: Bearer {{TOKEN}}"
-
 
 # -------------------------------------------------------
 # FLOW 5: ROLE MANAGEMENT
 # -------------------------------------------------------
 
-# 19. ADD NEW ROLE
-curl -X POST {{URL}}/api/developer/add-edit-role \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer {{TOKEN}}" \
-  -d '{
-    "role": "manager",
-    "permissions": ["admin_users.create", "admin_users.read", "roles.read"]
-  }'
-
-# 20. EDIT EXISTING ROLE
-curl -X POST {{URL}}/api/developer/add-edit-role \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer {{TOKEN}}" \
-  -d '{
-    "id": "ROLE_OBJECT_ID",
-    "role": "senior_manager",
-    "permissions": ["admin_users.create", "admin_users.read", "admin_users.delete", "roles.read"]
-  }'
-
-# 21. GET ALL ROLES (supports pagination & search)
-curl -X GET "{{URL}}/api/developer/get-all-roles?pageNumber=1&perPageData=10&searchRequest=manager" \
-  -H "Authorization: Bearer {{TOKEN}}"
-
-# 22. GET ROLE BY ID
-curl -X GET {{URL}}/api/developer/get-role/ROLE_OBJECT_ID \
-  -H "Authorization: Bearer {{TOKEN}}"
 
 # 23. TOGGLE ROLE STATUS (Active/Inactive)
-curl -X POST {{URL}}/api/developer/role-action-status/ROLE_OBJECT_ID \
-  -H "Authorization: Bearer {{TOKEN}}"
+
 
 # 24. DELETE ROLE (Soft Delete)
-curl -X DELETE {{URL}}/api/developer/delete-role/ROLE_OBJECT_ID \
-  -H "Authorization: Bearer {{TOKEN}}"
+
 
 
 # -------------------------------------------------------

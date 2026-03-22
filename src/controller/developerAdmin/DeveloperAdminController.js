@@ -63,6 +63,7 @@ export const addEditAdminProfile = async (req, res) => {
       result = await DeveloperAdmin.findByIdAndUpdate(id, payload, {
         new: true,
       });
+      result = filterData(result);
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -155,7 +156,7 @@ export const getAllAdmins = async (req, res) => {
         isLogin,
       },
 
-      populate: ['role'],
+      populate: [{ path: 'role', select: 'role isActive' }],
     });
 
     const data = {

@@ -3,6 +3,8 @@ import { StatusCodes } from 'http-status-codes';
 import {
   ResponseHandler,
   CatchErrorHandler,
+  queryBuilder,
+  filterData,
 } from '../../services/CommonServices.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import Logger from '../../utils/Logger.js';
@@ -77,11 +79,12 @@ export const addEditRole = async (req, res) => {
       result = await RoleManagement.findByIdAndUpdate(id, payload, {
         new: true,
       });
+      const data = filterData(result);
       return ResponseHandler(
         res,
         StatusCodes.OK,
         responseMessage.ROLE_UPDATED,
-        result
+        data
       );
     } else {
       // Global DeveloperAdmin implementation ensures no tenant restriction on roles created
@@ -99,11 +102,12 @@ export const addEditRole = async (req, res) => {
       }
 
       result = await RoleManagement.create(payload);
+      const data = filterData(result);
       return ResponseHandler(
         res,
         StatusCodes.CREATED,
         responseMessage.ROLE_ADDED,
-        result
+        data
       );
     }
   } catch (error) {
@@ -116,33 +120,30 @@ export const addEditRole = async (req, res) => {
 //#region Get All Roles
 export const getAllRoles = async (req, res) => {
   try {
-    const { pageNumber = 1, perPageData, searchRequest } = req.query;
+    const { pageNumber, perPageData, searchRequest, isActive } = req.query;
 
-    const query = { isDeleted: false };
-    if (searchRequest) {
-      query.$or = [{ role: { $regex: searchRequest, $options: 'i' } }];
-    }
+    const result = await queryBuilder(RoleManagement, {
+      pageNumber,
+      perPageData,
+      searchRequest,
 
-    const totalArrayLength = await RoleManagement.countDocuments(query);
-    const page = parseInt(pageNumber);
-    const limit = parseInt(perPageData || totalArrayLength);
-    const skip = (page - 1) * limit;
+      searchableFields: ["role"],
+      sort: { createdAt: -1 },
 
-    const data = await RoleManagement.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      filters: {
+        isActive,
+      },
+    });
+    const data = {
+      pagination: result.pagination,
+      data: result.data.map((admin) => filterData(admin)),
+    };
 
     return ResponseHandler(
       res,
       StatusCodes.OK,
       responseMessage.ROLE_FETCH_SUCCESS,
-      {
-        totalArrayLength,
-        pageNumber: page,
-        perPageData: limit,
-        data,
-      }
+      data
     );
   } catch (error) {
     logger.error(error);

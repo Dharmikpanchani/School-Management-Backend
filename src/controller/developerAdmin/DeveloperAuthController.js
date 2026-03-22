@@ -400,7 +400,12 @@ export const profile = async (req, res) => {
     const developer = await DeveloperAdmin.findOne({
       _id: req.developer_id,
       isDeleted: false,
-    }).populate('role');
+    })
+      .select('-isDeleted -__v')
+      .populate({
+        path: 'role',
+        select: 'role permissions',
+      });
 
     if (!developer) {
       return ResponseHandler(
@@ -412,7 +417,6 @@ export const profile = async (req, res) => {
 
     const responseData = {
       developer: filterData(developer),
-      role: developer.role,
     };
 
     return ResponseHandler(
