@@ -10,7 +10,6 @@ import { StatusCodes } from 'http-status-codes';
 import {
   forgotPasswordOtpMail,
   sendRegisterVerificationEmail,
-  sendLoginVerificationEmail,
 } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
 import RoleManagement from '../../models/schoolAdmin/RolePermission.js';
@@ -91,7 +90,7 @@ export const login = async (req, res) => {
       }
       const otp = generateOtp();
       await storeOtp('admin_login', email, otp);
-      await sendLoginVerificationEmail(otp, email, 'SuperAdmin');
+      await sendRegisterVerificationEmail(otp, email, 'SuperAdmin', 'Login');
 
       return ResponseHandler(
         res,
