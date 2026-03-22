@@ -190,7 +190,7 @@ export const deleteAdmin = async (req, res) => {
     return ResponseHandler(
       res,
       StatusCodes.OK,
-      responseMessage.ADMIN_DELETE_SUCCESS,
+      responseMessage.ADMIN_DELETE_SUCCESS
     );
   } catch (error) {
     logger.error(error);
