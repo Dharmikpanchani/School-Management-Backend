@@ -4,7 +4,6 @@ import {
   ResponseHandler,
   CatchErrorHandler,
   queryBuilder,
-  filterData,
 } from '../../services/CommonServices.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import Logger from '../../utils/Logger.js';
@@ -79,12 +78,11 @@ export const addEditRole = async (req, res) => {
       result = await RoleManagement.findByIdAndUpdate(id, payload, {
         new: true,
       });
-      const data = filterData(result);
       return ResponseHandler(
         res,
         StatusCodes.OK,
         responseMessage.ROLE_UPDATED,
-        data
+        result
       );
     } else {
       // Global DeveloperAdmin implementation ensures no tenant restriction on roles created
@@ -102,12 +100,11 @@ export const addEditRole = async (req, res) => {
       }
 
       result = await RoleManagement.create(payload);
-      const data = filterData(result);
       return ResponseHandler(
         res,
         StatusCodes.CREATED,
         responseMessage.ROLE_ADDED,
-        data
+        result
       );
     }
   } catch (error) {
@@ -136,7 +133,7 @@ export const getAllRoles = async (req, res) => {
     });
     const data = {
       pagination: result.pagination,
-      data: result.data.map((admin) => filterData(admin)),
+      data: result.data,
     };
 
     return ResponseHandler(

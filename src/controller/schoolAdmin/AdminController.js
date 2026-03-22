@@ -27,7 +27,6 @@ import {
 } from '../../services/TokenService.js';
 import School from '../../models/school/School.js';
 
-const { filterData } = await import('../../services/CommonServices.js');
 const logger = new Logger('./src/controller/schoolAdmin/AdminController.js');
 
 export const login = async (req, res) => {
@@ -441,7 +440,7 @@ export const profile = async (req, res) => {
     }
 
     const responseData = {
-      admin: filterData(admin),
+      admin: admin,
       role: admin.role,
       schoolData: admin.schoolId,
     };
@@ -783,7 +782,6 @@ export const getAllAdmins = async (req, res) => {
       .limit(limit)
       .populate('role');
 
-    const data = adminData.map((admin) => filterData(admin));
     return ResponseHandler(
       res,
       StatusCodes.OK,
@@ -792,7 +790,7 @@ export const getAllAdmins = async (req, res) => {
         totalArrayLength,
         pageNumber: page,
         perPageData: limit,
-        data,
+        adminData,
       }
     );
   } catch (error) {
@@ -853,12 +851,11 @@ export const adminStatusHandler = async (req, res) => {
       { new: true }
     );
 
-    const data = filterData(updatedAdmin);
     return ResponseHandler(
       res,
       StatusCodes.OK,
       responseMessage.ADMIN_STATUS_UPDATED,
-      data
+      updatedAdmin
     );
   } catch (error) {
     logger.error(error);

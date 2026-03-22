@@ -15,12 +15,20 @@ export function CatchErrorHandler(res, error) {
 //#endregion
 
 //#region for response handler
-export function ResponseHandler(res, status, message, result = null) {
+export function ResponseHandler(res, status, message, result = {}) {
+  let responseData = result?.data ?? result;
+
+  if (Array.isArray(responseData)) {
+    responseData = responseData.map((item) => filterData(item));
+  } else if (responseData && typeof responseData === "object") {
+    responseData = filterData(responseData);
+  }
+
   return res.status(status).json({
     status,
     message,
-    ...(result?.pagination && { pagination: result?.pagination }),
-    data: result?.data || result,
+    ...(result?.pagination && { pagination: result.pagination }),
+    data: responseData,
   });
 }
 

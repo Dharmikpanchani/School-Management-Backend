@@ -25,7 +25,6 @@ import {
   clearRefreshTokenCookie,
 } from '../../services/TokenService.js';
 
-const { filterData } = await import('../../services/CommonServices.js');
 const logger = new Logger(
   './src/controller/developerAdmin/DeveloperAuthController.js'
 );
@@ -415,15 +414,11 @@ export const profile = async (req, res) => {
       );
     }
 
-    const responseData = {
-      developer: filterData(developer),
-    };
-
     return ResponseHandler(
       res,
       StatusCodes.OK,
       responseMessage.PROFILE_FETCHED,
-      responseData
+      developer
     );
   } catch (error) {
     logger.error(error);
@@ -446,12 +441,11 @@ export const updateProfile = async (req, res) => {
       },
       { new: true }
     );
-    const data = filterData(update);
     return ResponseHandler(
       res,
       StatusCodes.OK,
       responseMessage.PROFILE_UPDATED,
-      data
+      update
     );
   } catch (error) {
     logger.error(error);

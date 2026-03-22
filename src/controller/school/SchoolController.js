@@ -5,7 +5,6 @@ import {
   CatchErrorHandler,
   ResponseHandler,
   encryptPassword,
-  filterData,
 } from '../../services/CommonServices.js';
 import Logger from '../../utils/Logger.js';
 import {
@@ -394,7 +393,7 @@ export const getSchoolById = async (req, res) => {
       res,
       StatusCodes.OK,
       responseMessage.SCHOOL_RETRIEVED_SUCCESSFULLY,
-      filterData(data)
+      data
     );
   } catch (error) {
     logger.error(`Get School By Id error: ${error}`);

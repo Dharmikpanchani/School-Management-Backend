@@ -4,7 +4,6 @@ import {
   ResponseHandler,
   CatchErrorHandler,
   encryptPassword,
-  filterData,
   queryBuilder,
 } from '../../services/CommonServices.js';
 import { StatusCodes } from 'http-status-codes';
@@ -63,7 +62,6 @@ export const addEditAdminProfile = async (req, res) => {
       result = await DeveloperAdmin.findByIdAndUpdate(id, payload, {
         new: true,
       });
-      result = filterData(result);
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -161,7 +159,7 @@ export const getAllAdmins = async (req, res) => {
 
     const data = {
       pagination: result.pagination,
-      data: result.data.map((admin) => filterData(admin)),
+      data: result.data,
     };
     return ResponseHandler(res, 200, responseMessage.ADMIN_FETCH_SUCCESS, data);
   } catch (error) {
@@ -221,12 +219,11 @@ export const adminStatusHandler = async (req, res) => {
       { new: true }
     );
 
-    const data = filterData(updatedAdmin);
     return ResponseHandler(
       res,
       StatusCodes.OK,
       responseMessage.ADMIN_STATUS_UPDATED,
-      data
+      updatedAdmin
     );
   } catch (error) {
     logger.error(error);
