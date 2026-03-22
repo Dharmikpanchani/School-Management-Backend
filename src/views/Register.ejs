@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
             margin: 0;
             padding: 0;
         }
+
         .container {
             width: 100%;
             max-width: 600px;
@@ -20,6 +22,7 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
         }
+
         .header {
             text-align: center;
             background-color: #007bff;
@@ -29,6 +32,7 @@
             border-top-right-radius: 8px;
             font-size: 24px;
         }
+
         .content {
             padding: 20px;
             text-align: center;
@@ -36,6 +40,7 @@
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
         }
+
         .otp-code {
             font-size: 24px;
             font-weight: bold;
@@ -46,12 +51,14 @@
             border-radius: 5px;
             margin-top: 10px;
         }
+
         .footer {
             text-align: center;
             font-size: 12px;
             color: #777;
             margin-top: 20px;
         }
+
         .btn {
             display: inline-block;
             background-color: #007bff;
@@ -62,25 +69,31 @@
             font-size: 16px;
             margin-top: 20px;
         }
+
         .btn:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
         <div class="header">
-            <%= type %> Register OTP Verification
+            <%= type %>
+                <%= action %> OTP Verification
         </div>
         <div class="content">
             <p>Hello,</p>
-            <p>Use the following OTP code to verify your email and complete your registration:</p>
-            <div class="otp-code"><%= otp %></div>
+            <p>Use the following OTP code to verify your email and complete your <%= action %>:</p>
+            <div class="otp-code">
+                <%= otp %>
+            </div>
             <p>This OTP is valid for <strong>5 minutes</strong>.</p>
             <p>If you didn't request this, please ignore this email.</p>
         </div>
     </div>
 
 </body>
+
 </html>

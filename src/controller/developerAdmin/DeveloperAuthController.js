@@ -10,7 +10,6 @@ import { StatusCodes } from 'http-status-codes';
 import {
   forgotPasswordOtpMail,
   sendRegisterVerificationEmail,
-  sendLoginVerificationEmail,
 } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
 import {
@@ -84,7 +83,7 @@ export const login = async (req, res) => {
       }
       const otp = generateOtp();
       await storeOtp('developer_login', email, otp);
-      await sendLoginVerificationEmail(otp, email, 'SuperDeveloper');
+      await sendRegisterVerificationEmail(otp, email, 'SuperDeveloper', "Login");
 
       return ResponseHandler(
         res,

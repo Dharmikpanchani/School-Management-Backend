@@ -9,16 +9,16 @@ import transporter from '../config/Email.config.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function sendRegisterVerificationEmail(otp, email, type) {
+export async function sendRegisterVerificationEmail(otp, email, type, action) {
   try {
     const templatePath = path.join(__dirname, '../views/Register.ejs');
 
-    const emailTemplate = await ejs.renderFile(templatePath, { otp, type });
+    const emailTemplate = await ejs.renderFile(templatePath, { otp, type, action });
 
     const mailOptions = {
       from: `"${type} App" <${config.EMAIL_FROM}>`, // ✅ fix
       to: email,
-      subject: `${type} Register OTP Notification`,
+      subject: `${type} ${action} OTP Notification`,
       html: emailTemplate,
     };
 
@@ -26,26 +26,6 @@ export async function sendRegisterVerificationEmail(otp, email, type) {
     logger.info(`OTP email sent successfully to ${email}`);
   } catch (error) {
     logger.error(`Error sending OTP email: ${error}`);
-  }
-}
-
-export async function sendLoginVerificationEmail(otp, email, type) {
-  try {
-    const templatePath = path.join(__dirname, '../views/Register.ejs');
-
-    const emailTemplate = await ejs.renderFile(templatePath, { otp, type });
-
-    const mailOptions = {
-      from: `"${type} App" <${config.EMAIL_FROM}>`,
-      to: email,
-      subject: `${type} Login OTP Verification`,
-      html: emailTemplate,
-    };
-
-    await transporter.sendMail(mailOptions);
-    logger.info(`Login OTP email sent successfully to ${email}`);
-  } catch (error) {
-    logger.error(`Error sending Login OTP email: ${error}`);
   }
 }
 

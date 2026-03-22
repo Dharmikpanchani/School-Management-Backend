@@ -114,7 +114,8 @@ export const schoolRegister = async (req, res) => {
     sendRegisterVerificationEmail(
       `Your School Register OTP is: ${otp}`,
       newAdmin.email,
-      'School'
+      'School',
+      "Register"
     ).catch((err) => logger.error(err));
 
     if (existingReferral) {

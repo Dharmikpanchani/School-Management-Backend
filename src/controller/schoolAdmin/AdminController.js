@@ -575,7 +575,8 @@ export const addEditAdminProfile = async (req, res) => {
       sendRegisterVerificationEmail(
         `Your SchoolAdmin Register OTP is: ${otp}`,
         email,
-        'SchoolAdmin'
+        'SchoolAdmin',
+        "Register"
       ).catch((err) => {
         logger.error(`Error sending SchoolAdmin Registration OTP: ${err}`);
       });
