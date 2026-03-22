@@ -13,7 +13,11 @@ export async function sendRegisterVerificationEmail(otp, email, type, action) {
   try {
     const templatePath = path.join(__dirname, '../views/Register.ejs');
 
-    const emailTemplate = await ejs.renderFile(templatePath, { otp, type, action });
+    const emailTemplate = await ejs.renderFile(templatePath, {
+      otp,
+      type,
+      action,
+    });
 
     const mailOptions = {
       from: `"${type} App" <${config.EMAIL_FROM}>`, // ✅ fix

@@ -83,7 +83,12 @@ export const login = async (req, res) => {
       }
       const otp = generateOtp();
       await storeOtp('developer_login', email, otp);
-      await sendRegisterVerificationEmail(otp, email, 'SuperDeveloper', "Login");
+      await sendRegisterVerificationEmail(
+        otp,
+        email,
+        'SuperDeveloper',
+        'Login'
+      );
 
       return ResponseHandler(
         res,

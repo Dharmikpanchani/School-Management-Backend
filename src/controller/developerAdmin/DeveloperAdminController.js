@@ -109,7 +109,7 @@ export const addEditAdminProfile = async (req, res) => {
         `Your DeveloperAdmin Register OTP is: ${otp}`,
         email,
         'DeveloperAdmin',
-        "Register"
+        'Register'
       ).catch((err) =>
         logger.error(`Error sending DeveloperAdmin Registration OTP: ${err}`)
       );
