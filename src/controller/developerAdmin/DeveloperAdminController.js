@@ -5,11 +5,11 @@ import {
   CatchErrorHandler,
   encryptPassword,
   filterData,
+  queryBuilder,
 } from '../../services/CommonServices.js';
 import { StatusCodes } from 'http-status-codes';
 import { sendRegisterVerificationEmail } from '../../services/EmailServices.js';
 import Logger from '../../utils/Logger.js';
-import RoleManagement from '../../models/schoolAdmin/RolePermission.js';
 import {
   generateOtp,
   storeOtp,
@@ -131,45 +131,38 @@ export const addEditAdminProfile = async (req, res) => {
 //#region 📄 Get All Admins
 export const getAllAdmins = async (req, res) => {
   try {
-    const { pageNumber = 1, perPageData, searchRequest } = req.query;
-    const query = { isDeleted: false };
+    const {
+      pageNumber,
+      perPageData,
+      searchRequest,
+      isActive,
+      isVerified,
+      isLogin,
+    } = req.query;
+    const result = await queryBuilder(DeveloperAdmin, {
+      pageNumber,
+      perPageData,
+      searchRequest,
 
-    if (searchRequest) {
-      const roles = await RoleManagement.find({
-        role: { $regex: searchRequest, $options: 'i' },
-        isDeleted: false,
-      }).select('_id');
+      searchableFields: ['name', 'email', 'phoneNumber', 'address'],
+      booleanFields: ['isActive', 'isVerified', 'isLogin'],
+      dateFields: ['createdAt'],
+      nestedFields: ['role.name'],
 
-      query.$or = [
-        { name: { $regex: searchRequest, $options: 'i' } },
-        { email: { $regex: searchRequest, $options: 'i' } },
-        { role: { $in: roles.map((r) => r._id) } },
-      ];
-    }
+      filters: {
+        isActive,
+        isVerified,
+        isLogin,
+      },
 
-    const totalArrayLength = await DeveloperAdmin.countDocuments(query);
-    const page = parseInt(pageNumber);
-    const limit = parseInt(perPageData || totalArrayLength);
-    const skip = (page - 1) * limit;
+      populate: ['role'],
+    });
 
-    const adminData = await DeveloperAdmin.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('role');
-
-    const data = adminData.map((admin) => filterData(admin));
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.ADMIN_FETCH_SUCCESS,
-      {
-        totalArrayLength,
-        pageNumber: page,
-        perPageData: limit,
-        data,
-      }
-    );
+    const data = {
+      pagination: result.pagination,
+      data: result.data.map((admin) => filterData(admin)),
+    };
+    return ResponseHandler(res, 200, responseMessage.ADMIN_FETCH_SUCCESS, data);
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);

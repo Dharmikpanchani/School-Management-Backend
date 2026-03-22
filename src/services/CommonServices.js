@@ -15,11 +15,12 @@ export function CatchErrorHandler(res, error) {
 //#endregion
 
 //#region for response handler
-export function ResponseHandler(res, status, message, data) {
+export function ResponseHandler(res, status, message, result = {}) {
   return res.status(status).json({
     status,
     message,
-    data,
+    ...(result.pagination && { pagination: result.pagination }),
+    data: result.data || result,
   });
 }
 
@@ -69,35 +70,100 @@ export const genrateToken = ({ payload }) => {
 };
 //#endregion
 
-// #region for pagination
-export const getPaginatedData = async (model, options) => {
+//#region for query builder
+export const queryBuilder = async (model, options = {}) => {
   const {
-    page = 1,
-    limit,
-    search = '',
+    pageNumber = 1,
+    perPageData = 10,
+    searchRequest = '',
     searchableFields = [],
+    booleanFields = [],
+    dateFields = [],
+    nestedFields = [],
     baseQuery = {},
-    sort = { createdAt: -1 }, // default sort
+    filters = {},
+    sort = { createdAt: -1 },
+    populate = [],
+    select = '',
+    lean = true,
   } = options;
 
-  const skip = (page - 1) * limit;
-  const query = { ...baseQuery };
+  const query = { isDeleted: false, ...baseQuery };
 
-  if (search && searchableFields.length > 0) {
-    query.$or = searchableFields.map((field) => ({
-      [field]: { $regex: search, $options: 'i' },
-    }));
+  // Filters (AND)
+  Object.keys(filters).forEach((key) => {
+    if (filters[key] !== undefined) {
+      if (filters[key] === 'true') query[key] = true;
+      else if (filters[key] === 'false') query[key] = false;
+      else query[key] = filters[key];
+    }
+  });
+
+  // Search (OR)
+  if (searchRequest) {
+    const regex = new RegExp(searchRequest, 'i');
+    const searchLower = searchRequest.toLowerCase();
+    let orConditions = [];
+
+    searchableFields.forEach((field) => {
+      orConditions.push({ [field]: regex });
+    });
+
+    nestedFields.forEach((field) => {
+      orConditions.push({ [field]: regex });
+    });
+
+    booleanFields.forEach((field) => {
+      if (searchLower === field.toLowerCase())
+        orConditions.push({ [field]: true });
+
+      if (searchLower === `not ${field.toLowerCase()}`)
+        orConditions.push({ [field]: false });
+    });
+
+    if (!isNaN(Date.parse(searchRequest))) {
+      const date = new Date(searchRequest);
+      dateFields.forEach((field) => {
+        orConditions.push({
+          [field]: {
+            $gte: new Date(date.setHours(0, 0, 0, 0)),
+            $lte: new Date(date.setHours(23, 59, 59, 999)),
+          },
+        });
+      });
+    }
+
+    query.$or = orConditions;
   }
 
+  const page = parseInt(pageNumber);
+  const limit = parseInt(perPageData);
+  const skip = (page - 1) * limit;
+
+  let dataQuery = model
+    .find(query)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .select(select);
+
+  populate.forEach((field) => {
+    dataQuery = dataQuery.populate(field);
+  });
+
+  if (lean) dataQuery = dataQuery.lean();
+
   const [data, total] = await Promise.all([
-    model.find(query).sort(sort).skip(skip).limit(limit).lean(),
+    dataQuery,
     model.countDocuments(query),
   ]);
-
   return {
-    totalArrayLength: total,
-    pageNumber: page,
-    perPageData: limit,
+    pagination: {
+      totalArrayLength: total,
+      pageNumber: page,
+      perPageData: limit,
+      totalPages: Math.ceil(total / limit),
+    },
     data,
   };
 };
