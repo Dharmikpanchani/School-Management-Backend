@@ -191,7 +191,6 @@ export const deleteAdmin = async (req, res) => {
       res,
       StatusCodes.OK,
       responseMessage.ADMIN_DELETE_SUCCESS,
-      null
     );
   } catch (error) {
     logger.error(error);
