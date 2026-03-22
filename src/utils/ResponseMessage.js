@@ -201,16 +201,6 @@ export const responseMessage = {
   ABOUTUS_FETCH_SUCCESS: 'AboutUs fetched successfully',
   ABOUTUS_DELETE_SUCCESS: 'AboutUs deleted successfully',
 
-  SALES_CREATED: 'Sales profile created successfully',
-  SALES_UPDATED: 'Sales profile updated successfully',
-  SALES_FETCH_SUCCESS: 'Sales profile(s) fetched successfully',
-  SALES_NOT_FOUND: 'Sales profile not found',
-  SALES_DELETED: 'Sales profile deleted successfully',
-  SALES_ALREADY_EXISTS:
-    'Sales profile with this email, number, or UPI ID already exists',
-
-  ACCOUNT_NOT_VERIFIED_PLEASE_VERIFY_OTP:
-    'Account not verified. Please verify OTP.',
   ACCOUNT_IS_DISABLED: 'Account is disabled.',
   INVALID_TOKEN_TYPE: 'Invalid token type',
   INVALID_OR_DISABLED_ACCOUNT: 'Invalid or disabled account',

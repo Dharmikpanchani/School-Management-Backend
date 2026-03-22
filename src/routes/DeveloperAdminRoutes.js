@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { validator } from '../middleware/Validator.js';
-import * as SalesController from '../controller/developerAdmin/SalesController.js';
 import * as DeveloperAdminController from '../controller/developerAdmin/DeveloperAdminController.js';
 import * as DeveloperAuthController from '../controller/developerAdmin/DeveloperAuthController.js';
 import * as DeveloperRolePermissionController from '../controller/developerAdmin/DeveloperRolePermissionController.js';
@@ -150,37 +149,6 @@ developerRoutes.post(
   developerAuth,
   checkPermission(developerRolePermissionList.roles.status),
   DeveloperRolePermissionController.roleActionStatus
-);
-//#endregion
-
-//#region Sales Management
-developerRoutes.post(
-  '/add-update-sales',
-  developerAuth,
-  checkPermission(developerRolePermissionList.sales.create),
-  validator('addEditSalesSchema'),
-  SalesController.addEditSales
-);
-
-developerRoutes.get(
-  '/get-all-sales',
-  developerAuth,
-  checkPermission(developerRolePermissionList.sales.read),
-  SalesController.getAllSales
-);
-
-developerRoutes.get(
-  '/get-sales/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.sales.read),
-  SalesController.getSalesById
-);
-
-developerRoutes.delete(
-  '/delete-sales/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.sales.delete),
-  SalesController.deleteSales
 );
 //#endregion
 
