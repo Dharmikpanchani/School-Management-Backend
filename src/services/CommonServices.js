@@ -39,7 +39,7 @@ export function filterData(
     'otpExpireAt',
     'referralId',
     'createdAt',
-    'isDeleted'
+    'isDeleted',
   ]
 ) {
   if (!data) return null;

@@ -127,7 +127,7 @@ export const getAllRoles = async (req, res) => {
       perPageData,
       searchRequest,
 
-      searchableFields: ["role"],
+      searchableFields: ['role'],
       sort: { createdAt: -1 },
 
       filters: {
