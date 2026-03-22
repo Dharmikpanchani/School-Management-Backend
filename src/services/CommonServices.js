@@ -20,7 +20,7 @@ export function ResponseHandler(res, status, message, result = {}) {
 
   if (Array.isArray(responseData)) {
     responseData = responseData.map((item) => filterData(item));
-  } else if (responseData && typeof responseData === "object") {
+  } else if (responseData && typeof responseData === 'object') {
     responseData = filterData(responseData);
   }
 
