@@ -1,20 +1,20 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const PaymentTransactionSchema = new mongoose.Schema(
   {
     schoolId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "School",
+      ref: 'School',
       default: null,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       default: null,
     },
     planId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Plan",
+      ref: 'Plan',
       default: null,
     },
 
@@ -39,18 +39,18 @@ const PaymentTransactionSchema = new mongoose.Schema(
     // ================= PAYMENT STATUS =================
     userPaymentStatus: {
       type: String,
-      enum: ["pending", "success", "failed"],
-      default: "pending",
+      enum: ['pending', 'success', 'failed'],
+      default: 'pending',
     },
     referralPaymentStatus: {
       type: String,
-      enum: ["pending", "processing", "sent", "failed"],
-      default: "pending",
+      enum: ['pending', 'processing', 'sent', 'failed'],
+      default: 'pending',
     },
     adminPaymentStatus: {
       type: String,
-      enum: ["pending", "received", "settlement_pending", "failed"],
-      default: "pending",
+      enum: ['pending', 'received', 'settlement_pending', 'failed'],
+      default: 'pending',
     },
 
     // ================= REFERRAL =================
@@ -70,19 +70,19 @@ const PaymentTransactionSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      default: "INR",
+      default: 'INR',
     },
 
     status: {
       type: String,
       enum: [
-        "pending",     // order created
-        "authorized",  // payment done but not captured
-        "success",     // payment captured
-        "failed",      // payment failed
-        "refunded",    // refund done
+        'pending', // order created
+        'authorized', // payment done but not captured
+        'success', // payment captured
+        'failed', // payment failed
+        'refunded', // refund done
       ],
-      default: "pending",
+      default: 'pending',
     },
 
     razorpayOrderId: {
@@ -129,7 +129,7 @@ const PaymentTransactionSchema = new mongoose.Schema(
 );
 
 const PaymentTransaction = mongoose.model(
-  "PaymentTransaction",
+  'PaymentTransaction',
   PaymentTransactionSchema
 );
 

@@ -1,8 +1,9 @@
-import Razorpay from "razorpay";
-import crypto from "crypto";
-import PaymentTransaction from "../models/PaymentTransaction.js";
-import { responseMessage } from "../utils/ResponseMessage.js";
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+import PaymentTransaction from '../models/PaymentTransaction.js';
+import { responseMessage } from '../utils/ResponseMessage.js';
 import Logger from '../utils/Logger.js';
+import { Buffer } from 'buffer';
 
 const logger = new Logger('./src/controller/PaymentController.js');
 // Razorpay instance
@@ -16,13 +17,17 @@ let contactsUrl = process.env.CONTACTS_URL;
 let fundAccountsUrl = process.env.FUND_ACCOUNTS;
 let payoutsUrl = process.env.PAYOUTS_URL;
 
-
-
-
 //#region Create Order
 export const createOrder = async (req, res) => {
   try {
-    const { amount, currency = "INR", schoolId, userId, planId, referralUpiId = defaultReferralUpiId } = req.body;
+    const {
+      amount,
+      currency = 'INR',
+      schoolId,
+      userId,
+      planId,
+      referralUpiId = defaultReferralUpiId,
+    } = req.body;
 
     if (!amount) {
       return res.status(400).json({
@@ -44,10 +49,10 @@ export const createOrder = async (req, res) => {
       amount,
       totalAmount: amount, // set total Amount
       currency,
-      status: "pending",
-      userPaymentStatus: "pending",
-      referralPaymentStatus: referralUpiId ? "pending" : null,
-      adminPaymentStatus: "pending",
+      status: 'pending',
+      userPaymentStatus: 'pending',
+      referralPaymentStatus: referralUpiId ? 'pending' : null,
+      adminPaymentStatus: 'pending',
       referralUpiId: referralUpiId || null,
       razorpayOrderId: order.id,
     });
@@ -60,7 +65,7 @@ export const createOrder = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error("Create Order Error:", error);
+    logger.error('Create Order Error:', error);
     res.status(500).json({
       success: false,
       message: responseMessage.ORDER_CREATION_FAILED,
@@ -72,23 +77,20 @@ export const createOrder = async (req, res) => {
 //#region Verify Payment
 export const verifyPayment = async (req, res) => {
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const body = razorpay_order_id + '|' + razorpay_payment_id;
 
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(body)
-      .digest("hex");
+      .digest('hex');
 
     if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
-        message: "Invalid signature",
+        message: 'Invalid signature',
       });
     }
 
@@ -97,7 +99,7 @@ export const verifyPayment = async (req, res) => {
       {
         razorpayPaymentId: razorpay_payment_id,
         razorpaySignature: razorpay_signature,
-        status: "authorized",
+        status: 'authorized',
       }
     );
 
@@ -106,7 +108,7 @@ export const verifyPayment = async (req, res) => {
       message: responseMessage.PAYMENT_VERIFIED,
     });
   } catch (error) {
-    logger.error("Verify Payment Error:", error);
+    logger.error('Verify Payment Error:', error);
     res.status(500).json({ success: false });
   }
 };
@@ -116,23 +118,25 @@ export const verifyPayment = async (req, res) => {
 export const razorpayWebhook = async (req, res) => {
   try {
     // ================= VERIFY SIGNATURE =================
-    const signature = req.headers["x-razorpay-signature"];
+    const signature = req.headers['x-razorpay-signature'];
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
     const payloadBody = Buffer.isBuffer(req.body)
       ? req.body
-      : Buffer.from(JSON.stringify(req.body || {}), "utf8");
+      : Buffer.from(JSON.stringify(req.body || {}), 'utf8');
 
     const expectedSignature = crypto
-      .createHmac("sha256", webhookSecret)
+      .createHmac('sha256', webhookSecret)
       .update(payloadBody)
-      .digest("hex");
+      .digest('hex');
 
     if (expectedSignature !== signature) {
-      return res.status(400).json({ success: false, message: responseMessage.INVALID_SIGNATURE });
+      return res
+        .status(400)
+        .json({ success: false, message: responseMessage.INVALID_SIGNATURE });
     }
 
-    const data = JSON.parse(payloadBody.toString("utf8"));
+    const data = JSON.parse(payloadBody.toString('utf8'));
     const event = data.event;
     const payment = data.payload.payment.entity;
 
@@ -142,18 +146,22 @@ export const razorpayWebhook = async (req, res) => {
     });
 
     if (!transaction) {
-      return res.status(200).json({ status: responseMessage.TRANSACTION_NOT_FOUND });
+      return res
+        .status(200)
+        .json({ status: responseMessage.TRANSACTION_NOT_FOUND });
     }
 
     // ================= DUPLICATE WEBHOOK PROTECTION =================
-    if (event === "payment.captured" && transaction.status === "success") {
-      return res.status(200).json({ status: responseMessage.ALREADY_PROCESSED });
+    if (event === 'payment.captured' && transaction.status === 'success') {
+      return res
+        .status(200)
+        .json({ status: responseMessage.ALREADY_PROCESSED });
     }
 
     // ================= PAYMENT SUCCESS =================
-    if (event === "payment.captured") {
-      transaction.status = "success";
-      transaction.userPaymentStatus = "success";
+    if (event === 'payment.captured') {
+      transaction.status = 'success';
+      transaction.userPaymentStatus = 'success';
       transaction.transactionId = payment.id;
       transaction.razorpayPaymentId = payment.id;
       transaction.method = payment.method;
@@ -172,16 +180,16 @@ export const razorpayWebhook = async (req, res) => {
 
         transaction.referralAmount = referralAmount;
         transaction.adminAmount = adminAmount;
-        transaction.referralPaymentStatus = "processing";
+        transaction.referralPaymentStatus = 'processing';
       } else {
         transaction.adminAmount = amount;
       }
 
       // Razorpay settlement later
-      transaction.adminPaymentStatus = "settlement_pending";
+      transaction.adminPaymentStatus = 'settlement_pending';
 
       // Subscription start/end (30 days example)
-      const days =30
+      const days = 30;
       transaction.startDate = new Date();
       transaction.endDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
@@ -190,27 +198,27 @@ export const razorpayWebhook = async (req, res) => {
       // ================= REFERRAL PAYOUT =================
       if (
         transaction.referralUpiId &&
-        transaction.referralPaymentStatus !== "sent"
+        transaction.referralPaymentStatus !== 'sent'
       ) {
         try {
           const authHeader =
-            "Basic " +
+            'Basic ' +
             Buffer.from(
               `${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`
-            ).toString("base64");
+            ).toString('base64');
 
           const headers = {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: authHeader,
           };
 
           // Create Contact
           const contactRes = await fetch(contactsUrl, {
-            method: "POST",
+            method: 'POST',
             headers,
             body: JSON.stringify({
-              name: "Referral User",
-              type: "employee",
+              name: 'Referral User',
+              type: 'employee',
             }),
           });
           const contactData = await contactRes.json();
@@ -218,11 +226,11 @@ export const razorpayWebhook = async (req, res) => {
 
           // Create Fund Account
           const fundRes = await fetch(fundAccountsUrl, {
-            method: "POST",
+            method: 'POST',
             headers,
             body: JSON.stringify({
               contact_id: contactData.id,
-              account_type: "vpa",
+              account_type: 'vpa',
               vpa: {
                 address: transaction.referralUpiId,
               },
@@ -233,25 +241,25 @@ export const razorpayWebhook = async (req, res) => {
 
           // Create Payout
           const payoutRes = await fetch(payoutsUrl, {
-            method: "POST",
+            method: 'POST',
             headers,
             body: JSON.stringify({
               account_number: process.env.RAZORPAY_ACCOUNT_NUMBER,
               fund_account_id: fundData.id,
               amount: referralAmount * 100,
-              currency: "INR",
-              mode: "UPI",
-              purpose: "commission",
+              currency: 'INR',
+              mode: 'UPI',
+              purpose: 'commission',
             }),
           });
           const payoutData = await payoutRes.json();
           if (payoutData.error) throw new Error(payoutData.error.description);
 
-          transaction.referralPaymentStatus = "sent";
+          transaction.referralPaymentStatus = 'sent';
           transaction.referralPayoutId = payoutData.id;
         } catch (error) {
-          logger.error("Referral payout failed:", error.message);
-          transaction.referralPaymentStatus = "failed";
+          logger.error('Referral payout failed:', error.message);
+          transaction.referralPaymentStatus = 'failed';
         }
 
         await transaction.save();
@@ -259,13 +267,13 @@ export const razorpayWebhook = async (req, res) => {
     }
 
     // ================= PAYMENT FAILED =================
-    if (event === "payment.failed") {
-      transaction.status = "failed";
-      transaction.userPaymentStatus = "failed";
-      transaction.adminPaymentStatus = "failed";
+    if (event === 'payment.failed') {
+      transaction.status = 'failed';
+      transaction.userPaymentStatus = 'failed';
+      transaction.adminPaymentStatus = 'failed';
 
       if (transaction.referralUpiId) {
-        transaction.referralPaymentStatus = "failed";
+        transaction.referralPaymentStatus = 'failed';
       }
 
       transaction.errorMessage = payment.error_description;
@@ -273,9 +281,9 @@ export const razorpayWebhook = async (req, res) => {
       await transaction.save();
     }
 
-    res.status(200).json({ status: "ok" });
+    res.status(200).json({ status: 'ok' });
   } catch (error) {
-    logger.error("Webhook Error:", error);
+    logger.error('Webhook Error:', error);
     res.status(500).json({ success: false });
   }
 };
@@ -302,7 +310,7 @@ export const getTransactions = async (req, res) => {
       data: transactions,
     });
   } catch (error) {
-    logger.error("Failed to fetch transactions:", error);
+    logger.error('Failed to fetch transactions:', error);
     res.status(500).json({
       success: false,
       message: responseMessage.FAILED_TO_FETCH_TRANSACTION,
