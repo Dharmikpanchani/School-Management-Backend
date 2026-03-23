@@ -46,100 +46,6 @@ export const responseMessage = {
   PASSWORD_ARE_SAME: 'New password and old password are same',
   INVALID_FILE_EXTENSION: 'Invalid file extension',
 
-  TESTIMONIAL_ADDED: 'Testimonial added successfully',
-  TESTIMONIAL_UPDATED: 'Testimonial updated successfully',
-  TESTIMONIAL_NOT_FOUND: 'Testimonial not found',
-  TESTIMONIAL_DELETE_SUCCESS: 'Testimonial Deleted successfully',
-  TESTIMONIAL_FETCH_SUCCESS: 'Testimonial fetched successfully',
-  TESTIMONIAL_INVALID_TYPE: 'Invalid or missing testimonial type',
-  TESTIMONIAL_STATUS_UPDATED: 'Testimonial status updated successfully.',
-  TESTIMONIAL_ASSIGNED_STATUS:
-    'Testimonial is currently in use and status cannot be changed.',
-
-  PROPERTY_ADDED: 'Property added successfully.',
-  PROPERTY_UPDATED: 'Property updated successfully.',
-  PROPERTY_FETCH_SUCCESS: 'Property fetched successfully.',
-  PROPERTY_NOT_FOUND: 'Property not found.',
-  PROPERTY_DELETE_SUCCESS: 'Property deleted successfully.',
-  PROPERTY_INVALID_CONSTRUCTION_STATUS: 'Construction status is required.',
-  PROPERTY_STATUS_UPDATED: 'Property status updated successfully.',
-  PROPERTY_ASSIGNED_STATUS:
-    'Property is currently in use and status cannot be changed.',
-
-  LOCATION_ADDED: 'Property Location added successfully.',
-  LOCATION_UPDATED: 'Property Location updated successfully.',
-  LOCATION_FETCH_SUCCESS: 'Property Location(s) fetched successfully.',
-  LOCATION_NOT_FOUND: 'Property Location not found.',
-  LOCATION_DELETE_SUCCESS: 'Property Location deleted successfully.',
-  LOCATION_STATUS_UPDATED: 'Property Location status updated successfully.',
-
-  EXPLORE_PROPERTY_NOT_FOUND: 'Explore Property not found',
-  EXPLORE_PROPERTY_UPDATED: 'Explore Property updated successfully',
-  EXPLORE_PROPERTY_ADDED: 'Explore Property added successfully',
-  EXPLORE_PROPERTY_FETCH_SUCCESS: 'Explore Property fetched successfully',
-  EXPLORE_PROPERTY_DELETE_SUCCESS: 'Explore Property deleted successfully',
-  EXPLORE_PROPERTY_STATUS_UPDATED:
-    'Explore Property status updated successfully',
-
-  BANNER_ADDED: 'Banner added successfully.',
-  BANNER_UPDATED: 'Banner updated successfully.',
-  BANNER_FETCH_SUCCESS: 'Banner fetched successfully.',
-  BANNER_NOT_FOUND: 'Banner not found.',
-  BANNER_DELETE_SUCCESS: 'Banner deleted successfully.',
-  BANNER_STATUS_UPDATED: 'Banner status updated successfully.',
-
-  BRAND_ADDED: 'Brand added successfully.',
-  BRAND_UPDATED: 'Brand updated successfully.',
-  BRAND_DELETE_SUCCESS: 'Brand deleted successfully.',
-  BRAND_NOT_FOUND: 'Brand not found.',
-  BRAND_FETCH_SUCCESS: 'Brand(s) fetched successfully.',
-  BRAND_STATUS_UPDATED: 'Brand status updated successfully.',
-  BRAND_ASSIGNED_STATUS:
-    'Brand is currently in use and status cannot be changed.',
-
-  FEATURE_ADDED: 'Feature added successfully.',
-  FEATURE_UPDATED: 'Feature updated successfully.',
-  FEATURE_DELETE_SUCCESS: 'Feature deleted successfully.',
-  FEATURE_NOT_FOUND: 'Feature not found.',
-  FEATURE_FETCH_SUCCESS: 'Feature fetched successfully.',
-  FEATURE_STATUS_UPDATED: 'Feature status updated successfully.',
-  FEATURE_ASSIGNED_STATUS:
-    'Feature is currently in use and status cannot be changed.',
-
-  EXCLUSIVE_ADDED: 'Exclusive property added successfully.',
-  EXCLUSIVE_UPDATED: 'Exclusive property updated successfully.',
-  EXCLUSIVE_FETCH_SUCCESS: 'Exclusive property fetched successfully.',
-  EXCLUSIVE_DELETE_SUCCESS: 'Exclusive property deleted successfully.',
-  EXCLUSIVE_NOT_FOUND: 'Exclusive property not found.',
-  EXCLUSIVE_STATUS_UPDATED: 'Exclusive property status updated successfully.',
-
-  LAST_UPDATE_ADDED: 'Infrastructure added successfully.',
-  LAST_UPDATE_UPDATED: 'Infrastructure updated successfully.',
-  LAST_UPDATE_DELETE_SUCCESS: 'Infrastructure deleted successfully.',
-  LAST_UPDATE_NOT_FOUND: 'Infrastructure not found.',
-  LAST_UPDATE_FETCH_SUCCESS: 'Infrastructure fetched successfully.',
-  LAST_UPDATE_STATUS_UPDATED: 'Infrastructure status updated successfully.',
-  LAST_UPDATE_ASSIGNED_STATUS:
-    'Infrastructure is currently in use and status cannot be changed.',
-
-  LINK_ADDED: 'Link added successfully.',
-  LINK_UPDATED: 'Link updated successfully.',
-  LINK_FETCH_SUCCESS: 'Link(s) fetched successfully.',
-  LINK_DELETE_SUCCESS: 'Link deleted successfully.',
-  LINK_NOT_FOUND: 'Link not found.',
-  LINK_STATUS_UPDATED: 'Link status updated successfully.',
-  LINK_ASSIGNED_STATUS:
-    'Link is currently in use and status cannot be changed.',
-
-  SOCIAL_MEDIA_ADDED: 'Social media link added successfully.',
-  SOCIAL_MEDIA_UPDATED: 'Social media link updated successfully.',
-  SOCIAL_MEDIA_FETCH_SUCCESS: 'Social media link(s) fetched successfully.',
-  SOCIAL_MEDIA_DELETE_SUCCESS: 'Social media link deleted successfully.',
-  SOCIAL_MEDIA_NOT_FOUND: 'Social media link not found.',
-  SOCIAL_MEDIA_STATUS_UPDATED: 'Social media status updated successfully.',
-  SOCIAL_MEDIA_ASSIGNED_STATUS:
-    'Social media is currently in use and status cannot be changed.',
-
   ROLE_ADDED: 'Role has been added successfully.',
   ROLE_UPDATED: 'Role has been updated successfully.',
   ROLE_FETCH_SUCCESS: 'Role(s) fetched successfully.',
@@ -152,54 +58,10 @@ export const responseMessage = {
     'Role is assigned to one or more users and cannot be deleted.',
   ROLE_ALREADY_EXISTS: 'Role name already exists.',
 
-  DATA_CREATED: 'Data created successfully',
-  DATA_UPDATED: 'Data updated successfully',
-  DATA_FOUND: 'Data fetched successfully',
-  DATA_NOT_FOUND: 'Data not found',
-  DATA_DELETED: 'Data deleted successfully',
-
-  CONTACT_US_ADDED: 'Contact request submitted successfully',
-  CONTACT_US_FETCHED: 'Contact requests fetched successfully',
-
-  SUBSCRIBE_ADDED: 'Subscriber added successfully',
-  SUBSCRIBE_FETCHED: 'Subscribers fetched successfully',
-  SUBSCRIBE_NOT_FOUND: 'Subscriber not found',
-
-  AMENITY_NOT_FOUND: 'Amenity not found',
-  AMENITY_UPDATED: 'Amenity updated successfully',
-  AMENITY_ADDED: 'Amenity added successfully',
-  AMENITY_FETCH_SUCCESS: 'Amenity fetched successfully',
-  AMENITY_DELETE_SUCCESS: 'Amenity deleted successfully',
-  AMENITY_STATUS_UPDATED: 'Amenity status updated successfully',
-
-  PROPERTY_TYPE_CREATED: 'Property type created successfully',
-  PROPERTY_TYPE_UPDATED: 'Property type updated successfully',
-  PROPERTY_TYPE_DELETED: 'Property type deleted successfully',
-  PROPERTY_TYPE_FOUND: 'Property type fetched successfully',
-  PROPERTY_TYPE_NOT_FOUND: 'Property type not found',
-  PROPERTY_ADDED_TO_FAVORITE: 'Property added to favorites successfully',
-  PROPERTY_REMOVED_FROM_FAVORITE:
-    'Property removed from favorites successfully',
-  PROPERTY_FAVORITE_UPDATED: 'Property favorite status updated successfully',
-
   REQUIRED_FIELD: 'All fields are required',
-  ENQUIRY_ADDED: 'Enquiry added successfully',
-  ENQUIRY_FETCH_SUCCESS: 'Enquiry fetched successfully',
-  ENQUIRY_NOT_FOUND: 'Enquiry not found',
-  ENQUIRY_FETCHED: 'Enquiry fetched successfully',
-  ENQUIRY_DELETED: 'Enquiry deleted successfully',
-  INVALID_ENQUIRY_TYPE: 'Invalid enquiry type',
-
   REQUIRED_FIELDS_MISSING: 'Description and at least one email are required',
   EMAIL_SEND_SUCCESS: 'Subscription email sent successfully',
   EMAIL_SEND_FAILED: 'Failed to send subscription email',
-
-  ABOUTUS_NOT_FOUND: 'AboutUs not found',
-  ABOUTUS_UPDATE_SUCCESS: 'AboutUs updated successfully',
-  ABOUTUS_CREATE_SUCCESS: 'AboutUs created successfully',
-  ABOUTUS_CREATE_FAILED: 'Failed to create AboutUs',
-  ABOUTUS_FETCH_SUCCESS: 'AboutUs fetched successfully',
-  ABOUTUS_DELETE_SUCCESS: 'AboutUs deleted successfully',
 
   ACCOUNT_IS_DISABLED: 'Account is disabled.',
   INVALID_TOKEN_TYPE: 'Invalid token type',
@@ -269,4 +131,12 @@ export const responseMessage = {
   ROLE_ID_IS_REQUIRED: 'Role ID is required',
   ROLE_IS_ASSIGNED_TO_ADMINS: 'Role is assigned to admins',
   ROLE_IS_ASSIGNED_TO_USERS: 'Role is assigned to users',
+
+  AMOUNT_REQUIRED: 'Amount is required',
+  ORDER_CREATION_FAILED: 'Order creation failed',
+  PAYMENT_VERIFIED:'Payment verified (waiting webhook)',
+  INVALID_SIGNATURE:'Invalid signature',
+  TRANSACTION_NOT_FOUND:'Transaction not found',
+  ALREADY_PROCESSED:'Already processed',
+  FAILED_TO_FETCH_TRANSACTION:'Failed to fetch transactions',
 };

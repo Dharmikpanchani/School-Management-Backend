@@ -28,6 +28,10 @@ app.use(
 );
 
 app.disable('x-powered-by');
+
+// Webhook raw body middleware MUST be before body parsers for this route
+app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
