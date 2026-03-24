@@ -62,7 +62,7 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     const duration = process.hrtime(start);
     const durationMs = duration[0] * 1000 + duration[1] / 1e6;
-    const logMessage = `Route called: ${req.method} ${req.path} | Status: ${res.statusCode} | Duration: ${durationMs.toFixed(2)} ms`;
+    const logMessage = `Route called: ${req.method} ${req.originalUrl} | Status: ${res.statusCode} | Duration: ${durationMs.toFixed(2)} ms`;
     logger.info(logMessage);
   });
   next();
