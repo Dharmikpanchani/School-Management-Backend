@@ -15,7 +15,7 @@ function App() {
       const { data } = await axios.post(
         "http://localhost:3032/api/payment/create-order",
         {
-          amount: 500,
+          amount: 1,
           schoolId: "507f1f77bcf86cd799439011",
           userId: "507f1f77bcf86cd799439012",
           planId: "507f1f77bcf86cd799439013",
@@ -27,7 +27,8 @@ function App() {
 
       // 2️⃣ Razorpay Checkout
       const options = {
-        key: "rzp_test_SUZIviB9qe39Q5",
+        // key: "rzp_test_SUZIviB9qe39Q5", //test mode
+        key: "rzp_live_SUgYbTUj3hREZv", //live mode
         amount: order.amount,
         currency: order.currency,
         name: "School ERP",
