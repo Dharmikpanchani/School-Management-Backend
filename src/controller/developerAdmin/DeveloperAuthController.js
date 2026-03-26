@@ -201,14 +201,13 @@ export const resendLoginOtp = async (req, res) => {
 
     const otp = generateOtp();
     await storeOtp('developer_login', email, otp);
-    await sendRegisterVerificationEmail(
-      otp,
-      email,
-      'SuperDeveloper',
-      'Login'
-    );
+    await sendRegisterVerificationEmail(otp, email, 'SuperDeveloper', 'Login');
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_SENT_SUCCESSFULLY);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.OTP_SENT_SUCCESSFULLY
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
