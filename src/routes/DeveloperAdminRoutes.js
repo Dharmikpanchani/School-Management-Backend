@@ -11,11 +11,10 @@ import MediaUpload from '../middleware/MediaUpload.js';
 
 const developerRoutes = Router();
 
-//#region Auth & Profile Management
+//#region Auth & OTP Management
 developerRoutes.use('/login', authLimiter);
-developerRoutes.use('/verify-email', authLimiter);
-developerRoutes.use('/re-send-otp', authLimiter);
-developerRoutes.use('/resend-forgot-otp', authLimiter);
+developerRoutes.use('/send-otp', authLimiter);
+developerRoutes.use('/verify-otp', authLimiter);
 
 developerRoutes.post(
   '/login',
@@ -24,22 +23,23 @@ developerRoutes.post(
 );
 
 developerRoutes.post(
-  '/verify-login-otp',
-  authLimiter,
-  validator('developerVerifyLoginOtpSchema'),
-  DeveloperAuthController.verifyLoginOtp
+  '/send-otp',
+  validator('sendOtpSchema'),
+  DeveloperAuthController.sendOtp
 );
+
 developerRoutes.post(
-  '/resend-login-otp',
-  authLimiter,
-  validator('developerForgotPasswordSchema'),
-  DeveloperAuthController.resendLoginOtp
+  '/verify-otp',
+  validator('verifyOtpSchema'),
+  DeveloperAuthController.verifyOtpCommon
 );
+
 developerRoutes.post(
   '/refresh-token',
   refreshTokenAuth,
   DeveloperAuthController.refreshToken
 );
+
 developerRoutes.post(
   '/logout',
   refreshTokenAuth,
@@ -47,36 +47,11 @@ developerRoutes.post(
 );
 
 developerRoutes.post(
-  '/verify-registration-otp',
-  authLimiter,
-  validator('developerVerifyRegistrationOtpSchema'),
-  DeveloperAuthController.verifyDeveloperRegistrationOtp
-);
-developerRoutes.post(
-  '/re-send-otp',
-  validator('developerForgotPasswordSchema'),
-  DeveloperAuthController.resendOtp
-);
-developerRoutes.post(
-  '/forgot-password',
-  validator('developerForgotPasswordSchema'),
-  DeveloperAuthController.forgotPassword
-);
-developerRoutes.post(
-  '/verify-otp',
-  validator('developerVerifyRegistrationOtpSchema'),
-  DeveloperAuthController.verifyForgotPasswordOtp
-);
-developerRoutes.post(
-  '/resend-forgot-otp',
-  validator('developerForgotPasswordSchema'),
-  DeveloperAuthController.resendForgotPasswordOtp
-);
-developerRoutes.post(
   '/reset-password',
   validator('developerResetPasswordSchema'),
   DeveloperAuthController.resetPassword
 );
+
 developerRoutes.post(
   '/change-password',
   developerAuth,
@@ -85,6 +60,7 @@ developerRoutes.post(
 );
 
 developerRoutes.get('/profile', developerAuth, DeveloperAuthController.profile);
+
 developerRoutes.patch(
   '/update-profile',
   developerAuth,
@@ -131,18 +107,21 @@ developerRoutes.post(
   checkPermission(developerRolePermissionList.roles.create),
   DeveloperRolePermissionController.addEditRole
 );
+
 developerRoutes.get(
   '/get-all-roles',
   developerAuth,
   checkPermission(developerRolePermissionList.roles.read),
   DeveloperRolePermissionController.getAllRoles
 );
+
 developerRoutes.get(
   '/get-role/:id',
   developerAuth,
   checkPermission(developerRolePermissionList.roles.read),
   DeveloperRolePermissionController.getRoleById
 );
+
 developerRoutes.delete(
   '/delete-role/:id',
   developerAuth,
@@ -150,6 +129,7 @@ developerRoutes.delete(
   checkRoleInUse,
   DeveloperRolePermissionController.deleteRole
 );
+
 developerRoutes.post(
   '/role-action-status/:id',
   developerAuth,
