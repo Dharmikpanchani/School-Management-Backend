@@ -3,13 +3,11 @@ import { joiPasswordExtendCore } from 'joi-password';
 const joiPassword = joi.extend(joiPasswordExtendCore);
 const joistring = joi.string();
 
-
 const adminLoginSchema = joi.object().keys({
   email: joistring.email().required().label('Email'),
   password: joistring.required().label('Password'),
   schoolCode: joistring.required().label('School Code'),
 });
-
 
 const changePasswordSchema = joi.object().keys({
   oldPassword: joiPassword
@@ -112,7 +110,6 @@ const changePasswordSchema = joi.object().keys({
     .label('Confirm password'),
 });
 
-
 const adminForgotPasswordSchema = joi.object().keys({
   email: joistring.email().required().label('Email'),
   schoolCode: joi.string().required().label('School Code'),
@@ -212,11 +209,9 @@ const schoolVerifyEmailSchema = joi.object({
   otp: joistring.required().length(6).label('OTP'),
 });
 
-
 const schoolResendOtpSchema = joi.object({
   email: joistring.email().required().label('Email'),
 });
-
 
 const schoolUpdateProfileSchema = joi.object({
   schoolName: joistring.optional().label('school name'),
@@ -235,7 +230,6 @@ const adminVerifyRegistrationOtpSchema = joi.object({
   otp: joistring.required().length(6).label('OTP'),
   school_id: joistring.required().label('School ID'),
 });
-
 
 const developerLoginSchema = joi.object().keys({
   email: joistring.email().required().label('Email'),
@@ -315,7 +309,6 @@ const developerResetPasswordSchema = joi.object().keys({
     .label('Confirm password'),
 });
 
-
 const developerUpdateProfileSchema = joi.object({
   name: joistring.optional().label('Name'),
   email: joistring.optional().email().label('Email'),
@@ -323,7 +316,6 @@ const developerUpdateProfileSchema = joi.object({
   address: joistring.optional().allow('').label('Address'),
   image: joistring.optional().allow('').label('Image'),
 });
-
 
 const adminVerifyLoginOtpSchema = joi.object({
   email: joistring.email().required().label('Email'),
