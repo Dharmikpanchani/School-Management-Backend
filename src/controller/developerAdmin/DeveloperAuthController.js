@@ -173,18 +173,30 @@ export const sendOtp = async (req, res) => {
 
     const developer = await DeveloperAdmin.findOne({ email, isDeleted: false });
     if (!developer) {
-      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.DEVELOPER_NOT_FOUND);
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.DEVELOPER_NOT_FOUND
+      );
     }
 
     // Registration check
     if (type === 'registration' && developer.isVerified) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.ADMIN_ALREADY_VERIFIED);
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.ADMIN_ALREADY_VERIFIED
+      );
     }
 
     // Rate limit
     const rateLimit = await checkOtpRateLimit(`developer_${type}`, email);
     if (rateLimit.limited) {
-      return ResponseHandler(res, StatusCodes.TOO_MANY_REQUESTS, rateLimit.message);
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
     }
 
     const otp = generateOtp();
@@ -194,12 +206,21 @@ export const sendOtp = async (req, res) => {
     if (type === 'login') {
       await sendRegisterVerificationEmail(otp, email, 'Developer', 'Login');
     } else if (type === 'registration') {
-      await sendRegisterVerificationEmail(otp, email, 'DeveloperAdmin', 'Registration');
+      await sendRegisterVerificationEmail(
+        otp,
+        email,
+        'DeveloperAdmin',
+        'Registration'
+      );
     } else if (type === 'forgot') {
       await forgotPasswordOtpMail(email, otp);
     }
 
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_SENT_SUCCESSFULLY);
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.OTP_SENT_SUCCESSFULLY
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -207,22 +228,36 @@ export const sendOtp = async (req, res) => {
 };
 //#endregion
 
-
 //#region Common Verify OTP (login | registration | forgot)
 export const verifyOtpCommon = async (req, res) => {
   try {
     const { email, otp, type } = req.body;
 
-    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false }).populate('role');
+    const developer = await DeveloperAdmin.findOne({
+      email,
+      isDeleted: false,
+    }).populate('role');
     if (!developer) {
-      return ResponseHandler(res, StatusCodes.NOT_FOUND, responseMessage.DEVELOPER_NOT_FOUND);
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.DEVELOPER_NOT_FOUND
+      );
     }
 
     const otpResult = await verifyOtp(`developer_${type}`, email, otp);
     if (!otpResult.success) {
-      if (otpResult.maxAttemptsReached && type === 'registration' && !developer.isVerified) {
+      if (
+        otpResult.maxAttemptsReached &&
+        type === 'registration' &&
+        !developer.isVerified
+      ) {
         await DeveloperAdmin.deleteOne({ _id: developer._id });
-        return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE);
+        return ResponseHandler(
+          res,
+          StatusCodes.BAD_REQUEST,
+          responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE
+        );
       }
       return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
     }
@@ -238,7 +273,12 @@ export const verifyOtpCommon = async (req, res) => {
       developer.isLogin = true;
       await developer.save();
 
-      return ResponseHandler(res, StatusCodes.OK, responseMessage.ADMIN_LOGIN_SUCCESSFULLY, { accessToken });
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
+        { accessToken }
+      );
     }
 
     // REGISTRATION OTP
@@ -247,14 +287,17 @@ export const verifyOtpCommon = async (req, res) => {
       developer.isActive = true;
       await developer.save();
 
-      return ResponseHandler(res, StatusCodes.OK, responseMessage.ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_);
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_
+      );
     }
 
     // FORGOT PASSWORD OTP
     if (type === 'forgot') {
       return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_VERIFIED);
     }
-
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
