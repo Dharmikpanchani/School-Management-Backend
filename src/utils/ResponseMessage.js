@@ -11,6 +11,7 @@ export const responseMessage = {
   INVALID_OLD_PASSWORD: 'Old password is incorrect',
   PASSWORD_NOT_MATCH: 'New password and confirm password do not match',
   SCHOOL_NOT_EXIST: 'School not exist',
+  OTP_EXPIRED_OR_INVALID: 'OTP expired or invalid',
 
   INVALID_OTP: 'Invalid OTP',
   OTP_EXPIRED: 'OTP expired',

@@ -405,7 +405,7 @@ export const verifyOtpCommon = async (req, res) => {
     else if (type === 'registration') otpType = 'developer';
     else if (type === 'forgotPassword') otpType = 'developer_forgot';
     else
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, responseMessage.INVALID_OTP);
 
     if (type === 'registration' && developer.isVerified) {
       return ResponseHandler(

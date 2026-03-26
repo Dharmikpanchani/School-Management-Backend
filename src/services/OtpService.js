@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import redis from '../config/Redis.config.js';
 import Logger from '../utils/Logger.js';
+import { responseMessage } from '../utils/ResponseMessage.js';
 
 const logger = new Logger('src/services/OtpService.js');
 
@@ -34,7 +35,7 @@ export const verifyOtp = async (type, identifier, inputOtp) => {
   const storedOtp = await redis.get(key);
 
   if (!storedOtp) {
-    return { success: false, message: 'OTP expired or not found' };
+    return { success: false, message: responseMessage.OTP_EXPIRED_OR_INVALID };
   }
 
   // Increment attempt counter
