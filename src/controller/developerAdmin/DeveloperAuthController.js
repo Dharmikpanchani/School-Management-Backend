@@ -92,7 +92,7 @@ export const login = async (req, res) => {
       return ResponseHandler(
         res,
         StatusCodes.OK,
-        'OTP sent to your email for verification.',
+        responseMessage.OTP_SENT_SUCCESSFULLY,
         { requireOtp: true, email: email }
       );
     }

@@ -76,7 +76,7 @@ export const checkOtpRateLimit = async (type, identifier) => {
   const count = await redis.incr(rateLimitKey);
 
   if (count === 1) {
-    await redis.expire(rateLimitKey, 300); // 5 minute window
+    await redis.expire(rateLimitKey, 180); // 3 minute window
   }
 
   if (count > 3) {
