@@ -171,12 +171,32 @@ export const sendOtp = async (req, res) => {
   try {
     const { email, type } = req.body;
 
+    // Map route type → OTP namespace key
+    const otpKeyMap = {
+      login: 'developer_login',
+      registration: 'developer',
+      forgot: 'developer_forgot',
+    };
+    const otpKey = otpKeyMap[type];
+    if (!otpKey) {
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type.');
+    }
+
     const developer = await DeveloperAdmin.findOne({ email, isDeleted: false });
     if (!developer) {
       return ResponseHandler(
         res,
         StatusCodes.NOT_FOUND,
         responseMessage.DEVELOPER_NOT_FOUND
+      );
+    }
+
+    // Login OTP only for SuperDeveloper
+    if (type === 'login' && !developer.isSuperDeveloper) {
+      return ResponseHandler(
+        res,
+        StatusCodes.FORBIDDEN,
+        'Only SuperDevelopers require login OTP.'
       );
     }
 
@@ -190,7 +210,7 @@ export const sendOtp = async (req, res) => {
     }
 
     // Rate limit
-    const rateLimit = await checkOtpRateLimit(`developer_${type}`, email);
+    const rateLimit = await checkOtpRateLimit(otpKey, email);
     if (rateLimit.limited) {
       return ResponseHandler(
         res,
@@ -200,11 +220,11 @@ export const sendOtp = async (req, res) => {
     }
 
     const otp = generateOtp();
-    await storeOtp(`developer_${type}`, email, otp);
+    await storeOtp(otpKey, email, otp);
 
     // Send email based on type
     if (type === 'login') {
-      await sendRegisterVerificationEmail(otp, email, 'Developer', 'Login');
+      await sendRegisterVerificationEmail(otp, email, 'SuperDeveloper', 'Login');
     } else if (type === 'registration') {
       await sendRegisterVerificationEmail(
         otp,
@@ -233,6 +253,17 @@ export const verifyOtpCommon = async (req, res) => {
   try {
     const { email, otp, type } = req.body;
 
+    // Map route type → OTP namespace key (must match sendOtp)
+    const otpKeyMap = {
+      login: 'developer_login',
+      registration: 'developer',
+      forgot: 'developer_forgot',
+    };
+    const otpKey = otpKeyMap[type];
+    if (!otpKey) {
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type.');
+    }
+
     const developer = await DeveloperAdmin.findOne({
       email,
       isDeleted: false,
@@ -245,7 +276,7 @@ export const verifyOtpCommon = async (req, res) => {
       );
     }
 
-    const otpResult = await verifyOtp(`developer_${type}`, email, otp);
+    const otpResult = await verifyOtp(otpKey, email, otp);
     if (!otpResult.success) {
       if (
         otpResult.maxAttemptsReached &&

@@ -566,6 +566,23 @@ const adminVerifyLoginOtpSchema = joi.object({
   schoolCode: joi.string().required().label('School Code'),
 });
 
+const sendOtpSchema = joi.object({
+  email: joistring.email().required().label('Email'),
+  type: joistring
+    .valid('login', 'registration', 'forgot')
+    .required()
+    .label('Type'),
+});
+
+const verifyOtpSchema = joi.object({
+  email: joistring.email().required().label('Email'),
+  otp: joistring.required().length(6).label('OTP'),
+  type: joistring
+    .valid('login', 'registration', 'forgot')
+    .required()
+    .label('Type'),
+});
+
 export default {
   adminLoginSchema,
   changePasswordSchema,
@@ -595,4 +612,6 @@ export default {
   developerUpdateProfileSchema,
   developerVerifyLoginOtpSchema,
   adminVerifyLoginOtpSchema,
+  sendOtpSchema,
+  verifyOtpSchema,
 };

@@ -14,6 +14,7 @@ const developerRoutes = Router();
 //#region Auth & OTP Management
 developerRoutes.use('/login', authLimiter);
 developerRoutes.use('/send-otp', authLimiter);
+developerRoutes.use('/resend-otp', authLimiter);
 developerRoutes.use('/verify-otp', authLimiter);
 
 developerRoutes.post(
@@ -24,6 +25,12 @@ developerRoutes.post(
 
 developerRoutes.post(
   '/send-otp',
+  validator('sendOtpSchema'),
+  DeveloperAuthController.sendOtp
+);
+
+developerRoutes.post(
+  '/resend-otp',
   validator('sendOtpSchema'),
   DeveloperAuthController.sendOtp
 );
@@ -44,6 +51,12 @@ developerRoutes.post(
   '/logout',
   refreshTokenAuth,
   DeveloperAuthController.logout
+);
+
+developerRoutes.post(
+  '/forgot-password',
+  validator('developerForgotPasswordSchema'),
+  DeveloperAuthController.forgotPassword
 );
 
 developerRoutes.post(
