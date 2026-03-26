@@ -224,7 +224,12 @@ export const sendOtp = async (req, res) => {
 
     // Send email based on type
     if (type === 'login') {
-      await sendRegisterVerificationEmail(otp, email, 'SuperDeveloper', 'Login');
+      await sendRegisterVerificationEmail(
+        otp,
+        email,
+        'SuperDeveloper',
+        'Login'
+      );
     } else if (type === 'registration') {
       await sendRegisterVerificationEmail(
         otp,
