@@ -71,7 +71,7 @@ export const login = async (req, res) => {
       );
     }
 
-    if (developer.isSuperDeveloper) {
+    if (developer.developerType == 'super_developer') {
       const rateLimit = await checkOtpRateLimit('developer_login', email);
       if (rateLimit.limited) {
         return ResponseHandler(

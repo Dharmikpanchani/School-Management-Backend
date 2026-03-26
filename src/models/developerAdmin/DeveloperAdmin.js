@@ -55,9 +55,10 @@ const DeveloperSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isSuperDeveloper: {
-      type: Boolean,
-      default: false,
+    developerType: {
+      type: String,
+      enum: ['super_developer', 'developer'],
+      default: 'developer',
     },
   },
   { timestamps: true }
