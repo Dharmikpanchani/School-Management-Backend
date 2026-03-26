@@ -34,7 +34,9 @@ export const redisCache = (ttl = 300) => {
       res.json = function (body) {
         if (res.statusCode === 200) {
           redis.set(cacheKey, JSON.stringify(body), 'EX', ttl).catch((err) => {
-            logger.error(`Failed to cache response for ${cacheKey}: ${err.message}`);
+            logger.error(
+              `Failed to cache response for ${cacheKey}: ${err.message}`
+            );
           });
         }
         return originalJson.call(this, body);

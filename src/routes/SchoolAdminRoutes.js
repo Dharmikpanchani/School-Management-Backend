@@ -83,7 +83,12 @@ adminRoutes.post(
   validator('changePasswordSchema'),
   AdminController.changePassword
 );
-adminRoutes.get('/profile', adminAuth, redisCache(300), AdminController.profile);
+adminRoutes.get(
+  '/profile',
+  adminAuth,
+  redisCache(300),
+  AdminController.profile
+);
 adminRoutes.patch(
   '/update-profile',
   adminAuth,

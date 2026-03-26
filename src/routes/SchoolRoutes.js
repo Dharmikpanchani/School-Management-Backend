@@ -35,7 +35,12 @@ schoolRoutes.post(
 );
 
 // Fully protected Root school Routes (No RBAC Needed)
-adminRoutes.get('/school-profile', adminAuth, redisCache(300), SchoolController.getProfile);
+adminRoutes.get(
+  '/school-profile',
+  adminAuth,
+  redisCache(300),
+  SchoolController.getProfile
+);
 adminRoutes.post(
   '/school-update-profile',
   adminAuth,
