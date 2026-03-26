@@ -6,7 +6,6 @@ import { authLimiter } from '../middleware/RateLimit.js';
 // Include adminAuth middleware
 import { adminAuth } from '../middleware/Auth.js';
 import { MediaUpload } from '../middleware/MediaUpload.js';
-import { redisCache } from '../middleware/RedisCache.js';
 const schoolRoutes = Router();
 const adminRoutes = Router();
 
@@ -35,12 +34,7 @@ schoolRoutes.post(
 );
 
 // Fully protected Root school Routes (No RBAC Needed)
-adminRoutes.get(
-  '/school-profile',
-  adminAuth,
-  redisCache(300),
-  SchoolController.getProfile
-);
+adminRoutes.get('/school-profile', adminAuth, SchoolController.getProfile);
 adminRoutes.post(
   '/school-update-profile',
   adminAuth,
@@ -48,8 +42,5 @@ adminRoutes.post(
   validator('schoolUpdateProfileSchema'),
   SchoolController.updateProfile
 );
-
-// Mount administrative routes
-schoolRoutes.use(adminRoutes);
 
 export default schoolRoutes;

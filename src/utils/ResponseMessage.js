@@ -11,7 +11,6 @@ export const responseMessage = {
   INVALID_OLD_PASSWORD: 'Old password is incorrect',
   PASSWORD_NOT_MATCH: 'New password and confirm password do not match',
   SCHOOL_NOT_EXIST: 'School not exist',
-  OTP_SENT_SUCCESSFULLY: 'OTP sent to your email for verification.',
 
   INVALID_OTP: 'Invalid OTP',
   OTP_EXPIRED: 'OTP expired',
@@ -42,6 +41,7 @@ export const responseMessage = {
   USER_STATUS_UPDATED: 'User status changed successfully',
   INVALID_IMAGE_EXTENSION: 'Invalid image extension',
   USER_NOT_VERIFIED: 'User not verified',
+  OTP_SENT_SUCCESSFULLY: 'OTP sent successfully',
   PASSWORD_RESET_SUCCESSFULLY: 'Password reset successfully',
   PASSWORD_ARE_SAME: 'New password and old password are same',
   INVALID_FILE_EXTENSION: 'Invalid file extension',

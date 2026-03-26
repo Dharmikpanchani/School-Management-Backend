@@ -8,7 +8,6 @@ import * as RoleManagementController from '../controller/schoolAdmin/RolePermiss
 import { checkPermission, checkRoleInUse } from '../middleware/Rbac.js';
 import { rolePermissionList } from '../utils/RolePermissionList.js';
 import * as SchoolController from '../controller/school/SchoolController.js';
-import { redisCache } from '../middleware/RedisCache.js';
 
 const adminRoutes = Router();
 
@@ -83,12 +82,7 @@ adminRoutes.post(
   validator('changePasswordSchema'),
   AdminController.changePassword
 );
-adminRoutes.get(
-  '/profile',
-  adminAuth,
-  redisCache(300),
-  AdminController.profile
-);
+adminRoutes.get('/profile', adminAuth, AdminController.profile);
 adminRoutes.patch(
   '/update-profile',
   adminAuth,
@@ -100,7 +94,6 @@ adminRoutes.get(
   '/get-all-admins',
   adminAuth,
   checkPermission(rolePermissionList.admin_users.read),
-  redisCache(300),
   AdminController.getAllAdmins
 );
 adminRoutes.delete(
@@ -137,7 +130,6 @@ adminRoutes.get(
   '/get-all-roles',
   adminAuth,
   checkPermission(rolePermissionList.roles.read),
-  redisCache(300),
   RoleManagementController.getAllRoles
 );
 adminRoutes.get(
