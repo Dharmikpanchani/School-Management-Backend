@@ -30,6 +30,12 @@ developerRoutes.post(
   DeveloperAuthController.verifyLoginOtp
 );
 developerRoutes.post(
+  '/resend-login-otp',
+  authLimiter,
+  validator('developerForgotPasswordSchema'),
+  DeveloperAuthController.resendLoginOtp
+);
+developerRoutes.post(
   '/refresh-token',
   refreshTokenAuth,
   DeveloperAuthController.refreshToken

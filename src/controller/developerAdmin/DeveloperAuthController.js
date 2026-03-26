@@ -163,6 +163,57 @@ export const verifyLoginOtp = async (req, res) => {
     return CatchErrorHandler(res, error);
   }
 };
+
+export const resendLoginOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const developer = await DeveloperAdmin.findOne({
+      email,
+      isDeleted: false,
+    });
+
+    if (!developer) {
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.DEVELOPER_NOT_FOUND
+      );
+    }
+
+    if (!developer.isSuperDeveloper) {
+      return ResponseHandler(
+        res,
+        StatusCodes.FORBIDDEN,
+        'Only SuperDevelopers require login OTP.'
+      );
+    }
+
+    // Rate limit check
+    const rateLimit = await checkOtpRateLimit('developer_login', email);
+    if (rateLimit.limited) {
+      return ResponseHandler(
+        res,
+        StatusCodes.TOO_MANY_REQUESTS,
+        rateLimit.message
+      );
+    }
+
+    const otp = generateOtp();
+    await storeOtp('developer_login', email, otp);
+    await sendRegisterVerificationEmail(
+      otp,
+      email,
+      'SuperDeveloper',
+      'Login'
+    );
+
+    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_SENT_SUCCESSFULLY);
+  } catch (error) {
+    logger.error(error);
+    return CatchErrorHandler(res, error);
+  }
+};
 //#endregion
 
 //#region Refresh Token
