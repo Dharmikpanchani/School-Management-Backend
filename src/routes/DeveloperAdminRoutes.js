@@ -13,22 +13,26 @@ const developerRoutes = Router();
 
 //#region Auth & Profile Management
 developerRoutes.use('/login', authLimiter);
-developerRoutes.use('/verify-email', authLimiter);
-developerRoutes.use('/re-send-otp', authLimiter);
-developerRoutes.use('/resend-forgot-otp', authLimiter);
 
 developerRoutes.post(
   '/login',
   validator('developerLoginSchema'),
   DeveloperAuthController.login
 );
+developerRoutes.post(
+  '/verify-otp',
+  authLimiter,
+  validator('developerVerifyOtpCommonSchema'),
+  DeveloperAuthController.verifyOtpCommon
+);
 
 developerRoutes.post(
-  '/verify-login-otp',
+  '/re-send-otp',
   authLimiter,
-  validator('developerVerifyLoginOtpSchema'),
-  DeveloperAuthController.verifyLoginOtp
+  validator('developerSendOtpCommonSchema'),
+  DeveloperAuthController.sendOtp
 );
+
 developerRoutes.post(
   '/refresh-token',
   refreshTokenAuth,
@@ -41,30 +45,9 @@ developerRoutes.post(
 );
 
 developerRoutes.post(
-  '/verify-registration-otp',
-  authLimiter,
-  validator('developerVerifyRegistrationOtpSchema'),
-  DeveloperAuthController.verifyDeveloperRegistrationOtp
-);
-developerRoutes.post(
-  '/re-send-otp',
-  validator('developerForgotPasswordSchema'),
-  DeveloperAuthController.resendOtp
-);
-developerRoutes.post(
   '/forgot-password',
   validator('developerForgotPasswordSchema'),
   DeveloperAuthController.forgotPassword
-);
-developerRoutes.post(
-  '/verify-otp',
-  validator('developerVerifyRegistrationOtpSchema'),
-  DeveloperAuthController.verifyForgotPasswordOtp
-);
-developerRoutes.post(
-  '/resend-forgot-otp',
-  validator('developerForgotPasswordSchema'),
-  DeveloperAuthController.resendForgotPasswordOtp
 );
 developerRoutes.post(
   '/reset-password',

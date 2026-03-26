@@ -121,49 +121,7 @@ export const login = async (req, res) => {
 };
 //#endregion
 
-//#region Verify Login OTP
-export const verifyLoginOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    const developer = await DeveloperAdmin.findOne({
-      email,
-      isDeleted: false,
-    }).populate('role');
 
-    if (!developer) {
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.DEVELOPER_NOT_FOUND
-      );
-    }
-
-    const otpResult = await verifyOtp('developer_login', email, otp);
-    if (!otpResult.success) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
-    }
-
-    const payload = { id: developer._id, type: 'developer' };
-    const accessToken = generateAccessToken(payload);
-    const refreshToken = generateRefreshToken(payload);
-
-    setRefreshTokenCookie(res, refreshToken);
-
-    developer.isLogin = true;
-    await developer.save();
-
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
-      { accessToken }
-    );
-  } catch (error) {
-    logger.error(error);
-    return CatchErrorHandler(res, error);
-  }
-};
-//#endregion
 
 //#region Refresh Token
 export const refreshToken = async (req, res) => {
@@ -271,32 +229,7 @@ export const forgotPassword = async (req, res) => {
 };
 //#endregion
 
-//#region Verify Forgot Password OTP
-export const verifyForgotPasswordOtp = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
 
-    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false });
-    if (!developer) {
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        responseMessage.DEVELOPER_NOT_FOUND
-      );
-    }
-
-    const otpResult = await verifyOtp('developer_forgot', email, otp);
-    if (!otpResult.success) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
-    }
-
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_VERIFIED);
-  } catch (error) {
-    logger.error(error);
-    return CatchErrorHandler(res, error);
-  }
-};
-//#endregion
 
 //#region Reset Password
 export const resetPassword = async (req, res) => {
@@ -454,27 +387,37 @@ export const updateProfile = async (req, res) => {
 };
 //#endregion
 
-//#region Verify DeveloperAdmin Registration OTP
-export const verifyDeveloperRegistrationOtp = async (req, res) => {
+//#region Verify OTP Common
+export const verifyOtpCommon = async (req, res) => {
   try {
-    const { email, otp } = req.body;
-    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false });
-    if (!developer)
+    const { email, otp, type } = req.body;
+    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false }).populate('role');
+
+    if (!developer) {
       return ResponseHandler(
         res,
         StatusCodes.NOT_FOUND,
         responseMessage.DEVELOPER_NOT_FOUND
       );
-    if (developer.isVerified)
+    }
+
+    let otpType = '';
+    if (type === 'login') otpType = 'developer_login';
+    else if (type === 'registration') otpType = 'developer';
+    else if (type === 'forgotPassword') otpType = 'developer_forgot';
+    else return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
+
+    if (type === 'registration' && developer.isVerified) {
       return ResponseHandler(
         res,
         StatusCodes.BAD_REQUEST,
         responseMessage.ADMIN_ALREADY_VERIFIED
       );
+    }
 
-    const otpResult = await verifyOtp('developer', email, otp);
+    const otpResult = await verifyOtp(otpType, email, otp);
     if (!otpResult.success) {
-      if (otpResult.maxAttemptsReached && !developer.isVerified) {
+      if (type === 'registration' && otpResult.maxAttemptsReached && !developer.isVerified) {
         await DeveloperAdmin.deleteOne({ _id: developer._id });
         return ResponseHandler(
           res,
@@ -485,15 +428,35 @@ export const verifyDeveloperRegistrationOtp = async (req, res) => {
       return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
     }
 
-    developer.isVerified = true;
-    developer.isActive = true;
-    await developer.save();
+    if (type === 'login') {
+      const payload = { id: developer._id, type: 'developer' };
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
 
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_
-    );
+      setRefreshTokenCookie(res, refreshToken);
+
+      developer.isLogin = true;
+      await developer.save();
+
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
+        { accessToken }
+      );
+    } else if (type === 'registration') {
+      developer.isVerified = true;
+      developer.isActive = true;
+      await developer.save();
+
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_
+      );
+    } else if (type === 'forgotPassword') {
+      return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_VERIFIED);
+    }
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
@@ -501,79 +464,54 @@ export const verifyDeveloperRegistrationOtp = async (req, res) => {
 };
 //#endregion
 
-//#region Resend Registration OTP
-export const resendOtp = async (req, res) => {
+//#region Send OTP Common
+export const sendOtp = async (req, res) => {
   try {
-    const { email } = req.body;
-
+    const { email, type } = req.body;
     const developer = await DeveloperAdmin.findOne({ email, isDeleted: false });
-    if (!developer)
+
+    if (!developer) {
       return ResponseHandler(
         res,
         StatusCodes.NOT_FOUND,
         responseMessage.DEVELOPER_NOT_FOUND
       );
-    if (developer.isVerified)
+    }
+
+    let otpType = '';
+    if (type === 'login') otpType = 'developer_login';
+    else if (type === 'registration') otpType = 'developer';
+    else if (type === 'forgotPassword') otpType = 'developer_forgot';
+    else return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
+
+    if (type === 'registration' && developer.isVerified) {
       return ResponseHandler(
         res,
         StatusCodes.BAD_REQUEST,
         responseMessage.ADMIN_IS_ALREADY_VERIFIED_NO_OTP_NEEDED
       );
+    }
 
-    const rateLimit = await checkOtpRateLimit('developer', email);
-    if (rateLimit.limited)
+    const rateLimit = await checkOtpRateLimit(otpType, email);
+    if (rateLimit.limited) {
       return ResponseHandler(
         res,
         StatusCodes.TOO_MANY_REQUESTS,
         rateLimit.message
       );
+    }
 
-    const otp = generateOtp();
-    await storeOtp('developer', email, otp);
-    sendRegisterVerificationEmail(
-      `Your DeveloperAdmin Register OTP is: ${otp}`,
-      email,
-      'DeveloperAdmin'
-    ).catch((err) =>
-      logger.error(`Error re-sending DeveloperAdmin Registration OTP: ${err}`)
-    );
+    const otp = await generateOtp();
+    await storeOtp(otpType, email, otp);
 
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.OTP_SENT_SUCCESSFULLY
-    );
-  } catch (error) {
-    logger.error(error);
-    return CatchErrorHandler(res, error);
-  }
-};
-//#endregion
-
-//#region Resend Forgot Password OTP
-export const resendForgotPasswordOtp = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false });
-    if (!developer)
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.DEVELOPER_NOT_FOUND
-      );
-
-    const rateLimit = await checkOtpRateLimit('developer_forgot', email);
-    if (rateLimit.limited)
-      return ResponseHandler(
-        res,
-        StatusCodes.TOO_MANY_REQUESTS,
-        rateLimit.message
-      );
-
-    const otp = generateOtp();
-    await storeOtp('developer_forgot', email, otp);
-    await forgotPasswordOtpMail(email, otp);
+    if (type === 'login') {
+      await sendRegisterVerificationEmail(otp, email, 'SuperDeveloper', 'Login');
+    } else if (type === 'registration') {
+      sendRegisterVerificationEmail(`Your DeveloperAdmin Register OTP is: ${otp}`, email, 'DeveloperAdmin')
+        .catch((err) => logger.error(`Error re-sending DeveloperAdmin Registration OTP: ${err}`));
+    } else if (type === 'forgotPassword') {
+      await forgotPasswordOtpMail(email, otp);
+    }
 
     return ResponseHandler(
       res,
