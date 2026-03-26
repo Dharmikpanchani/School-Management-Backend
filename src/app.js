@@ -42,10 +42,13 @@ app.use(compression());
 // Apply rate limiter to all api routes
 app.use('/api', apiLimiter);
 
-app.use(express.static(path.join(__dirname, '../public')));
+// Use specific max-age for static assets (1 year for hashed files in prod)
+const CACHE_MAX_AGE = 31536000000; // 1 Year in ms
+
+app.use(express.static(path.join(__dirname, '../public'), { maxAge: CACHE_MAX_AGE, immutable: true }));
 app.use(
   '/api/images',
-  express.static(path.join(__dirname, '../public/uploads'))
+  express.static(path.join(__dirname, '../public/uploads'), { maxAge: CACHE_MAX_AGE })
 );
 
 app.use((req, res, next) => {
