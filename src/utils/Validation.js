@@ -569,12 +569,18 @@ const adminVerifyLoginOtpSchema = joi.object({
 const developerVerifyOtpCommonSchema = joi.object({
   email: joistring.email().required().label('Email'),
   otp: joistring.required().length(6).label('OTP'),
-  type: joistring.valid('login', 'registration', 'forgotPassword').required().label('Type'),
+  type: joistring
+    .valid('login', 'registration', 'forgotPassword')
+    .required()
+    .label('Type'),
 });
 
 const developerSendOtpCommonSchema = joi.object({
   email: joistring.email().required().label('Email'),
-  type: joistring.valid('login', 'registration', 'forgotPassword').required().label('Type'),
+  type: joistring
+    .valid('login', 'registration', 'forgotPassword')
+    .required()
+    .label('Type'),
 });
 
 export default {

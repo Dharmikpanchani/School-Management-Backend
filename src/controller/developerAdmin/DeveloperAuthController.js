@@ -121,8 +121,6 @@ export const login = async (req, res) => {
 };
 //#endregion
 
-
-
 //#region Refresh Token
 export const refreshToken = async (req, res) => {
   try {
@@ -228,8 +226,6 @@ export const forgotPassword = async (req, res) => {
   }
 };
 //#endregion
-
-
 
 //#region Reset Password
 export const resetPassword = async (req, res) => {
@@ -391,7 +387,10 @@ export const updateProfile = async (req, res) => {
 export const verifyOtpCommon = async (req, res) => {
   try {
     const { email, otp, type } = req.body;
-    const developer = await DeveloperAdmin.findOne({ email, isDeleted: false }).populate('role');
+    const developer = await DeveloperAdmin.findOne({
+      email,
+      isDeleted: false,
+    }).populate('role');
 
     if (!developer) {
       return ResponseHandler(
@@ -405,7 +404,8 @@ export const verifyOtpCommon = async (req, res) => {
     if (type === 'login') otpType = 'developer_login';
     else if (type === 'registration') otpType = 'developer';
     else if (type === 'forgotPassword') otpType = 'developer_forgot';
-    else return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
+    else
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
 
     if (type === 'registration' && developer.isVerified) {
       return ResponseHandler(
@@ -417,7 +417,11 @@ export const verifyOtpCommon = async (req, res) => {
 
     const otpResult = await verifyOtp(otpType, email, otp);
     if (!otpResult.success) {
-      if (type === 'registration' && otpResult.maxAttemptsReached && !developer.isVerified) {
+      if (
+        type === 'registration' &&
+        otpResult.maxAttemptsReached &&
+        !developer.isVerified
+      ) {
         await DeveloperAdmin.deleteOne({ _id: developer._id });
         return ResponseHandler(
           res,
@@ -482,7 +486,8 @@ export const sendOtp = async (req, res) => {
     if (type === 'login') otpType = 'developer_login';
     else if (type === 'registration') otpType = 'developer';
     else if (type === 'forgotPassword') otpType = 'developer_forgot';
-    else return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
+    else
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
 
     if (type === 'registration' && developer.isVerified) {
       return ResponseHandler(
@@ -505,10 +510,20 @@ export const sendOtp = async (req, res) => {
     await storeOtp(otpType, email, otp);
 
     if (type === 'login') {
-      await sendRegisterVerificationEmail(otp, email, 'SuperDeveloper', 'Login');
+      await sendRegisterVerificationEmail(
+        otp,
+        email,
+        'SuperDeveloper',
+        'Login'
+      );
     } else if (type === 'registration') {
-      sendRegisterVerificationEmail(`Your DeveloperAdmin Register OTP is: ${otp}`, email, 'DeveloperAdmin')
-        .catch((err) => logger.error(`Error re-sending DeveloperAdmin Registration OTP: ${err}`));
+      sendRegisterVerificationEmail(
+        `Your DeveloperAdmin Register OTP is: ${otp}`,
+        email,
+        'DeveloperAdmin'
+      ).catch((err) =>
+        logger.error(`Error re-sending DeveloperAdmin Registration OTP: ${err}`)
+      );
     } else if (type === 'forgotPassword') {
       await forgotPasswordOtpMail(email, otp);
     }
