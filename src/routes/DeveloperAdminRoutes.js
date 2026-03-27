@@ -127,12 +127,6 @@ developerRoutes.delete(
   checkRoleInUse,
   DeveloperRolePermissionController.deleteRole
 );
-developerRoutes.post(
-  '/role-action-status/:id',
-  developerAuth,
-  checkPermission(developerRolePermissionList.roles.status),
-  DeveloperRolePermissionController.roleActionStatus
-);
 //#endregion
 
 export default developerRoutes;
