@@ -104,6 +104,8 @@ export const login = async (req, res) => {
     const refreshToken = generateRefreshToken(payload);
 
     setRefreshTokenCookie(res, refreshToken);
+    admin.isLogin = true;
+    await admin.save();
 
     const adminData = admin.toObject();
     delete adminData.password;
@@ -159,6 +161,8 @@ export const verifyLoginOtp = async (req, res) => {
     const refreshToken = generateRefreshToken(payload);
 
     setRefreshTokenCookie(res, refreshToken);
+    admin.isLogin = true;
+    await admin.save();
 
     const adminData = admin.toObject();
     delete adminData.password;
@@ -188,12 +192,12 @@ export const refreshToken = async (req, res) => {
     }
 
     const admin = await SchoolAdmin.findById(token_id);
-    if (!admin || admin.isDeleted || !admin.isActive) {
+    if (!admin || admin.isDeleted || !admin.isActive || !admin.isLogin) {
       clearRefreshTokenCookie(res);
       return ResponseHandler(
         res,
         StatusCodes.UNAUTHORIZED,
-        responseMessage.INVALID_OR_DISABLED_ACCOUNT
+        responseMessage.INVALID_OR_DISABLED_ACCOUNT || 'Your session has expired. Please log in again.'
       );
     }
 
@@ -219,6 +223,8 @@ export const refreshToken = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
+    const { token_id } = req;
+    await SchoolAdmin.findByIdAndUpdate(token_id, { isLogin: false });
     clearRefreshTokenCookie(res);
     return ResponseHandler(
       res,

@@ -218,6 +218,8 @@ export const verifyLoginOtp = async (req, res) => {
     const refreshToken = generateRefreshToken(payload);
 
     setRefreshTokenCookie(res, refreshToken);
+    user.isLogin = true;
+    await user.save();
 
     const userData = user.toObject();
     delete userData.password;
@@ -251,12 +253,12 @@ export const refreshToken = async (req, res) => {
       );
 
     const user = await User.findById(token_id);
-    if (!user || user.isDeleted || !user.isActive) {
+    if (!user || user.isDeleted || !user.isActive || !user.isLogin) {
       clearRefreshTokenCookie(res);
       return ResponseHandler(
         res,
         StatusCodes.UNAUTHORIZED,
-        responseMessage.INVALID_OR_DISABLED_ACCOUNT
+        responseMessage.INVALID_OR_DISABLED_ACCOUNT || 'Your session has expired. Please log in again.'
       );
     }
 
@@ -284,6 +286,8 @@ export const refreshToken = async (req, res) => {
 //#region Logout
 export const logout = async (req, res) => {
   try {
+    const { token_id } = req;
+    await User.findByIdAndUpdate(token_id, { isLogin: false });
     clearRefreshTokenCookie(res);
     return ResponseHandler(
       res,

@@ -136,12 +136,12 @@ export const refreshToken = async (req, res) => {
     }
 
     const developer = await DeveloperAdmin.findById(token_id);
-    if (!developer || developer.isDeleted || !developer.isActive) {
+    if (!developer || developer.isDeleted || !developer.isActive || !developer.isLogin) {
       clearRefreshTokenCookie(res);
       return ResponseHandler(
         res,
         StatusCodes.UNAUTHORIZED,
-        responseMessage.INVALID_OR_DISABLED_ACCOUNT
+        responseMessage.INVALID_OR_DISABLED_ACCOUNT || 'Your session has expired. Please log in again.'
       );
     }
 

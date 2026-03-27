@@ -68,6 +68,13 @@ export const userAuth = async (req, res, next) => {
         responseMessage.USER_NOT_ACTIVE
       );
     }
+    if (!user.isLogin) {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        'Your session has expired. Please log in again.'
+      );
+    }
 
     req.user_id = user._id;
     req.user = user;
@@ -131,6 +138,13 @@ export const adminAuth = async (req, res, next) => {
         res,
         StatusCodes.UNAUTHORIZED,
         responseMessage.ADMIN_ACCOUNT_IS_DISABLED
+      );
+    }
+    if (!admin.isLogin) {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        'Your session has expired. Please log in again.'
       );
     }
 
@@ -201,6 +215,13 @@ export const developerAuth = async (req, res, next) => {
         res,
         StatusCodes.UNAUTHORIZED,
         responseMessage.DEVELOPER_ACCOUNT_IS_DISABLED
+      );
+    }
+    if (!developer.isLogin) {
+      return ResponseHandler(
+        res,
+        StatusCodes.UNAUTHORIZED,
+        'Your session has expired. Please log in again.'
       );
     }
 

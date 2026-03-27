@@ -63,6 +63,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    isLogin: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
