@@ -19,9 +19,23 @@ const logger = new Logger('app.js');
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' })); // For images
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  // Add other origins as needed
+];
+
 app.use(
   cors({
-    origin: '*', // Adjust this to your specific frontend domains in production for better security
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // required to send/receive cookies
   })
@@ -48,12 +62,8 @@ app.use(
   express.static(path.join(__dirname, '../public/uploads'))
 );
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,auth');
-  next();
-});
+// Removed manual CORS headers as they conflict with the 'cors' middleware configuration
+// and specifically break with 'credentials: true' which forbids '*' origin.
 
 // Logger for route calls
 app.use((req, res, next) => {
