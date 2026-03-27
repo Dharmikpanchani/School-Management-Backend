@@ -258,7 +258,8 @@ export const refreshToken = async (req, res) => {
       return ResponseHandler(
         res,
         StatusCodes.UNAUTHORIZED,
-        responseMessage.INVALID_OR_DISABLED_ACCOUNT || 'Your session has expired. Please log in again.'
+        responseMessage.INVALID_OR_DISABLED_ACCOUNT ||
+          'Your session has expired. Please log in again.'
       );
     }
 

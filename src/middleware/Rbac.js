@@ -31,7 +31,10 @@ export const checkPermission = (requiredPermission) => {
       }
 
       // If user is a super admin or super developer, bypass checks
-      if (userOrAdmin.isSuperAdmin || userOrAdmin.developerType == 'super_developer') {
+      if (
+        userOrAdmin.isSuperAdmin ||
+        userOrAdmin.developerType == 'super_developer'
+      ) {
         return next();
       }
 

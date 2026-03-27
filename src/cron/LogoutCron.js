@@ -14,13 +14,16 @@ export const initLogoutCron = () => {
   // schedule runs every day at 12:00 AM (midnight)
   cron.schedule('0 0 * * *', async () => {
     try {
-      logger.info('Midnight sync: Logging out all users (Developer, Admin, User)');
+      logger.info(
+        'Midnight sync: Logging out all users (Developer, Admin, User)'
+      );
 
-      const [developerUpdate, schoolAdminUpdate, userUpdate] = await Promise.all([
-        DeveloperAdmin.updateMany({}, { isLogin: false }),
-        SchoolAdmin.updateMany({}, { isLogin: false }),
-        User.updateMany({}, { isLogin: false }),
-      ]);
+      const [developerUpdate, schoolAdminUpdate, userUpdate] =
+        await Promise.all([
+          DeveloperAdmin.updateMany({}, { isLogin: false }),
+          SchoolAdmin.updateMany({}, { isLogin: false }),
+          User.updateMany({}, { isLogin: false }),
+        ]);
 
       logger.info(
         `Midnight logout cron completed successfully: 
