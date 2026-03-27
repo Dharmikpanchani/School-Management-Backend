@@ -48,9 +48,6 @@ export const addEditRole = async (req, res) => {
         isDeleted: false,
       });
 
-      const payload = {
-        permissions: parsedPermissions,
-      };
       if (!existingRole) {
         return ResponseHandler(
           res,
@@ -59,18 +56,28 @@ export const addEditRole = async (req, res) => {
         );
       }
 
-      const duplicate = await RoleManagement.findOne({
-        _id: { $ne: id },
-        role: payload.role,
-        isDeleted: false,
-      });
+      const payload = {
+        permissions: parsedPermissions,
+      };
 
-      if (duplicate) {
-        return ResponseHandler(
-          res,
-          StatusCodes.CONFLICT,
-          responseMessage.ROLE_ALREADY_EXISTS
-        );
+      if (role) {
+        payload.role = role.trim();
+      }
+
+      if (payload.role) {
+        const duplicate = await RoleManagement.findOne({
+          _id: { $ne: id },
+          role: payload.role,
+          isDeleted: false,
+        });
+
+        if (duplicate) {
+          return ResponseHandler(
+            res,
+            StatusCodes.CONFLICT,
+            responseMessage.ROLE_ALREADY_EXISTS
+          );
+        }
       }
 
       result = await RoleManagement.findByIdAndUpdate(id, payload, {
