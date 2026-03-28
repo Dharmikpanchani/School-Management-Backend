@@ -11,9 +11,7 @@ import {
   storeOtp,
   checkOtpRateLimit,
 } from '../../services/OtpService.js';
-import {
-  sendRegisterVerificationEmail,
-} from '../../services/EmailServices.js'; // Can be reused for OTP or make a specific one
+import { sendRegisterVerificationEmail } from '../../services/EmailServices.js'; // Can be reused for OTP or make a specific one
 import SchoolAdmin from '../../models/schoolAdmin/SchoolAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 
