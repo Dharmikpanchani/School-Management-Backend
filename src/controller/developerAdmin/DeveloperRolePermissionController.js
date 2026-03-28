@@ -126,11 +126,11 @@ export const addEditRole = async (req, res) => {
 //#region Get All Roles
 export const getAllRoles = async (req, res) => {
   try {
-    const { pageNumber, perPageData, searchRequest, isActive } = req.query;
+    const { pageNumber, perPageData, searchRequest, isActive, type } = req.query;
 
     const result = await queryBuilder(RoleManagement, {
-      pageNumber,
-      perPageData,
+      pageNumber: type ? 1 : pageNumber,
+      perPageData: type ? Number.MAX_SAFE_INTEGER : perPageData,
       searchRequest,
 
       searchableFields: ['role'],
@@ -140,10 +140,13 @@ export const getAllRoles = async (req, res) => {
         isActive,
       },
     });
-    const data = {
-      pagination: result.pagination,
-      data: result.data,
-    };
+
+    const data = type
+      ? { data: result.data }
+      : {
+          pagination: result.pagination,
+          data: result.data,
+        };
 
     return ResponseHandler(
       res,

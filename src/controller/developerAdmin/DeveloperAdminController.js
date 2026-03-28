@@ -139,7 +139,7 @@ export const addEditAdminProfile = async (req, res) => {
 //#region 📄 Get All Admins
 export const getAllAdmins = async (req, res) => {
   try {
-    const { pageNumber, perPageData, searchRequest, isActive, isLogin } =
+    const { pageNumber, perPageData, searchRequest, isActive, isLogin, role } =
       req.query;
     const result = await queryBuilder(DeveloperAdmin, {
       pageNumber,
@@ -155,6 +155,7 @@ export const getAllAdmins = async (req, res) => {
         isActive,
         isVerified: true,
         isLogin,
+        role,
       },
 
       populate: [{ path: 'role', select: 'role isActive' }],
