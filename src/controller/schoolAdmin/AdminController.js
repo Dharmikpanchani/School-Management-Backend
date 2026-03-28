@@ -155,11 +155,7 @@ export const verifyOtpCommon = async (req, res) => {
     else if (type === 'registration') otpNamespace = 'admin';
     else if (type === 'forgotPassword') otpNamespace = 'admin_forgot';
     else
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        'Invalid OTP type'
-      );
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
 
     const otpResult = await verifyOtp(otpNamespace, email, otp);
     if (!otpResult.success) {
@@ -212,7 +208,6 @@ export const verifyOtpCommon = async (req, res) => {
   }
 };
 //#endregion
-
 
 export const refreshToken = async (req, res) => {
   try {
@@ -325,8 +320,6 @@ export const forgotPassword = async (req, res) => {
     return CatchErrorHandler(res, error);
   }
 };
-
-
 
 export const resetPassword = async (req, res) => {
   try {

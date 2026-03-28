@@ -32,14 +32,17 @@ adminRoutes.post(
   SchoolController.updateProfile
 );
 
-adminRoutes.post('/login', validator('adminLoginSchema'), AdminController.login);
+adminRoutes.post(
+  '/login',
+  validator('adminLoginSchema'),
+  AdminController.login
+);
 adminRoutes.post(
   '/verify-otp',
   authLimiter,
   validator('adminVerifyOtpCommonSchema'),
   AdminController.verifyOtpCommon
 );
-
 
 adminRoutes.post(
   '/add-edit-admin',
@@ -60,7 +63,6 @@ adminRoutes.post(
   validator('adminForgotPasswordSchema'),
   AdminController.forgotPassword
 );
-
 
 adminRoutes.post(
   '/re-send-otp',
