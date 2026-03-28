@@ -354,9 +354,10 @@ export const updateSchoolById = async (req, res) => {
 export const getSchoolImageByCode = async (req, res) => {
   try {
     const { schoolCode } = req.body;
-    const school = await School.findOne({ schoolCode, isDeleted: false }).select(
-      'logo schoolName'
-    );
+    const school = await School.findOne({
+      schoolCode,
+      isDeleted: false,
+    }).select('logo schoolName');
 
     if (!school) {
       return ResponseHandler(
@@ -378,4 +379,3 @@ export const getSchoolImageByCode = async (req, res) => {
   }
 };
 //#endregion
-

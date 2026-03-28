@@ -106,7 +106,6 @@ adminRoutes.post(
   SchoolController.updateProfile
 );
 
-
 adminRoutes.get(
   '/get-all-admins',
   adminAuth,
