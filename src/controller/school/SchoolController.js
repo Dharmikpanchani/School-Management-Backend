@@ -1,6 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
 import School from '../../models/school/School.js';
-import Referral from '../../models/school/Referral.js';
 import {
   CatchErrorHandler,
   ResponseHandler,
@@ -10,12 +9,10 @@ import Logger from '../../utils/Logger.js';
 import {
   generateOtp,
   storeOtp,
-  verifyOtp,
   checkOtpRateLimit,
 } from '../../services/OtpService.js';
 import {
   sendRegisterVerificationEmail,
-  sendSubscriptionBaseMail,
 } from '../../services/EmailServices.js'; // Can be reused for OTP or make a specific one
 import SchoolAdmin from '../../models/schoolAdmin/SchoolAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
@@ -31,8 +28,14 @@ export const schoolRegister = async (req, res) => {
       email,
       phoneNumber,
       password,
-      referralId,
       schoolCode,
+      address,
+      city,
+      state,
+      zipCode,
+      country,
+      board,
+      schoolType,
     } = req.body;
 
     // 1. Check if school exists
@@ -46,23 +49,6 @@ export const schoolRegister = async (req, res) => {
         StatusCodes.CONFLICT,
         responseMessage.SCHOOL_ALREADY_EXISTS
       );
-    }
-
-    // 2. Referral Check
-    let existingReferral = null;
-    if (referralId) {
-      existingReferral = await Referral.findById(referralId).populate(
-        'schools',
-        'schoolName email phoneNumber schoolCode isActive'
-      );
-
-      if (!existingReferral) {
-        return ResponseHandler(
-          res,
-          StatusCodes.BAD_REQUEST,
-          responseMessage.REFERRAL_NOT_FOUND
-        );
-      }
     }
 
     // 3. Hash Passwords
@@ -87,7 +73,15 @@ export const schoolRegister = async (req, res) => {
       phoneNumber,
       schoolCode,
       password: schoolPassword,
-      referralId: existingReferral ? existingReferral._id : null,
+      referralId: req.admin_id,
+      address,
+      city,
+      state,
+      zipCode,
+      country,
+      board,
+      schoolType,
+      logo: req.files?.logo?.[0]?.filename || '',
     });
 
     // ✅ 6. CREATE DEFAULT ADMIN
@@ -100,12 +94,6 @@ export const schoolRegister = async (req, res) => {
       isVerified: false,
     });
 
-    // 7. Referral Update — store only schoolId
-    if (existingReferral) {
-      existingReferral.schools.push(newSchool._id);
-      await existingReferral.save();
-    }
-
     // 8. OTP for SchoolAdmin
     const otp = generateOtp();
     await storeOtp('admin', newAdmin.email, otp);
@@ -117,13 +105,6 @@ export const schoolRegister = async (req, res) => {
       'Register'
     ).catch((err) => logger.error(err));
 
-    if (existingReferral) {
-      // ✅ 🔥 SEND MAIL TO REFERRAL OWNER
-      sendSubscriptionBaseMail(
-        `The school "${newSchool.schoolName}" has successfully registered using your referral.`,
-        [existingReferral.email]
-      ).catch((err) => logger.error(`Referral Mail Error: ${err}`));
-    }
     return ResponseHandler(
       res,
       StatusCodes.CREATED,
@@ -135,117 +116,6 @@ export const schoolRegister = async (req, res) => {
     );
   } catch (error) {
     logger.error(error);
-    return CatchErrorHandler(res, error);
-  }
-};
-//#endregion
-
-//#region Verify OTP & Activate School
-export const verifySchoolEmail = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    // Find both school and admin by email
-    const school = await School.findOne({ email });
-    if (!school) {
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.SCHOOL_NOT_FOUND
-      );
-    }
-
-    const admin = await SchoolAdmin.findOne({ email, schoolId: school._id });
-    if (!admin) {
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.ADMIN_NOT_FOUND_FOR_THIS_SCHOOL
-      );
-    }
-
-    if (admin.isVerified) {
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        responseMessage.SCHOOL_IS_ALREADY_VERIFIED
-      );
-    }
-
-    // OTP was stored with type 'admin' during registration
-    const otpResult = await verifyOtp('admin', email, otp);
-
-    if (!otpResult.success) {
-      if (otpResult.maxAttemptsReached && !admin.isVerified) {
-        // Hard delete unverified school and admin on max attempts
-        await School.deleteOne({ _id: school._id });
-        await SchoolAdmin.deleteOne({ _id: admin._id });
-        return ResponseHandler(
-          res,
-          StatusCodes.BAD_REQUEST,
-          responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE_1
-        );
-      }
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
-    }
-
-    // Activate both school and admin
-    school.isVerified = true;
-    school.isActive = true;
-    await school.save();
-
-    admin.isVerified = true;
-    admin.isActive = true;
-    await admin.save();
-
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.SCHOOL_EMAIL_VERIFIED_AND_ACCOUNT_ACTIVA
-    );
-  } catch (error) {
-    logger.error(`Error verifying school email: ${error}`);
-    return CatchErrorHandler(res, error);
-  }
-};
-//#endregion
-
-//#region Resend OTP
-export const resendOtp = async (req, res) => {
-  try {
-    const { email } = req.body;
-    const school = await School.findOne({ email });
-
-    if (!school) {
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.SCHOOL_NOT_FOUND_1
-      );
-    }
-
-    const rateLimit = await checkOtpRateLimit('school', email);
-    if (rateLimit.limited) {
-      return ResponseHandler(
-        res,
-        StatusCodes.TOO_MANY_REQUESTS,
-        rateLimit.message
-      );
-    }
-
-    const otp = generateOtp();
-    await storeOtp('school', email, otp);
-    sendSubscriptionBaseMail(`<span style="color:#4f46e5;">${otp}</span>`, [
-      email,
-    ]).catch((err) => logger.error(`Error sending OTP email: ${err}`));
-
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.OTP_RESENT_SUCCESSFULLY
-    );
-  } catch (error) {
-    logger.error(`Error resending OTP: ${error}`);
     return CatchErrorHandler(res, error);
   }
 };

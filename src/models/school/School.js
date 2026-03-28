@@ -44,6 +44,16 @@ const SchoolSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    board: {
+      type: String,
+      enum: ['CBSE', 'GSEB', 'ICSE', 'Other'],
+      required: true,
+    },
+    schoolType: {
+      type: String,
+      enum: ['Primary', 'Secondary', 'Higher Secondary'],
+      required: true,
+    },
     schoolCode: {
       type: String,
       unique: true,

@@ -14,25 +14,6 @@ schoolRoutes.use('/schoolRegister', authLimiter);
 schoolRoutes.use('/verify-email', authLimiter);
 schoolRoutes.use('/resend-otp', authLimiter);
 
-schoolRoutes.post(
-  '/schoolRegister',
-  validator('schoolRegisterSchema'),
-  SchoolController.schoolRegister
-);
-
-schoolRoutes.post(
-  '/verify-email',
-  validator('schoolVerifyEmailSchema'),
-  SchoolController.verifySchoolEmail
-);
-
-// Protected Auth Routes
-schoolRoutes.post(
-  '/resend-otp',
-  validator('schoolResendOtpSchema'),
-  SchoolController.resendOtp
-);
-
 // Fully protected Root school Routes (No RBAC Needed)
 adminRoutes.get('/school-profile', adminAuth, SchoolController.getProfile);
 adminRoutes.post(

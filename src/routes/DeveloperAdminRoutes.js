@@ -3,6 +3,7 @@ import { validator } from '../middleware/Validator.js';
 import * as DeveloperAdminController from '../controller/developerAdmin/DeveloperAdminController.js';
 import * as DeveloperAuthController from '../controller/developerAdmin/DeveloperAuthController.js';
 import * as DeveloperRolePermissionController from '../controller/developerAdmin/DeveloperRolePermissionController.js';
+import * as SchoolController from '../controller/school/SchoolController.js';
 import { developerAuth, refreshTokenAuth } from '../middleware/Auth.js';
 import { checkPermission, checkRoleInUse } from '../middleware/Rbac.js';
 import { developerRolePermissionList } from '../utils/RolePermissionList.js';
@@ -133,6 +134,17 @@ developerRoutes.delete(
   checkPermission(developerRolePermissionList.role.delete),
   checkRoleInUse,
   DeveloperRolePermissionController.deleteRole
+);
+//#endregion
+
+//#region School CRUD Management
+developerRoutes.post(
+  '/schoolRegister',
+  developerAuth,
+  checkPermission(developerRolePermissionList.school.create),
+  MediaUpload(),
+  validator('schoolRegisterSchema'),
+  SchoolController.schoolRegister
 );
 //#endregion
 

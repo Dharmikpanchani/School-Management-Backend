@@ -1,4 +1,6 @@
 import DeveloperAdmin from '../../models/developerAdmin/DeveloperAdmin.js';
+import School from '../../models/school/School.js';
+import SchoolAdmin from '../../models/schoolAdmin/SchoolAdmin.js';
 import { responseMessage } from '../../utils/ResponseMessage.js';
 import {
   ResponseHandler,
@@ -393,6 +395,63 @@ export const updateProfile = async (req, res) => {
 export const verifyOtpCommon = async (req, res) => {
   try {
     const { email, otp, type } = req.body;
+
+    if (type === 'schoolRegistration') {
+      const school = await School.findOne({ email });
+      if (!school) {
+        return ResponseHandler(
+          res,
+          StatusCodes.NOT_FOUND,
+          responseMessage.SCHOOL_NOT_FOUND
+        );
+      }
+
+      const admin = await SchoolAdmin.findOne({ email, schoolId: school._id });
+      if (!admin) {
+        return ResponseHandler(
+          res,
+          StatusCodes.NOT_FOUND,
+          responseMessage.ADMIN_NOT_FOUND_FOR_THIS_SCHOOL
+        );
+      }
+
+      if (admin.isVerified) {
+        return ResponseHandler(
+          res,
+          StatusCodes.BAD_REQUEST,
+          responseMessage.SCHOOL_IS_ALREADY_VERIFIED
+        );
+      }
+
+      const otpResult = await verifyOtp('admin', email, otp);
+      if (!otpResult.success) {
+        if (otpResult.maxAttemptsReached && !admin.isVerified) {
+          await School.deleteOne({ _id: school._id });
+          await SchoolAdmin.deleteOne({ _id: admin._id });
+          return ResponseHandler(
+            res,
+            StatusCodes.BAD_REQUEST,
+            responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE_1
+          );
+        }
+        return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
+      }
+
+      school.isVerified = true;
+      school.isActive = true;
+      await school.save();
+
+      admin.isVerified = true;
+      admin.isActive = true;
+      await admin.save();
+
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.SCHOOL_EMAIL_VERIFIED_AND_ACCOUNT_ACTIVA
+      );
+    }
+
     const developer = await DeveloperAdmin.findOne({
       email,
       isDeleted: false,
@@ -446,12 +505,9 @@ export const verifyOtpCommon = async (req, res) => {
       const payload = { id: developer._id, type: 'developer' };
       const accessToken = generateAccessToken(payload);
       const refreshToken = generateRefreshToken(payload);
-
       setRefreshTokenCookie(res, refreshToken);
-
       developer.isLogin = true;
       await developer.save();
-
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -462,7 +518,6 @@ export const verifyOtpCommon = async (req, res) => {
       developer.isVerified = true;
       developer.isActive = true;
       await developer.save();
-
       return ResponseHandler(
         res,
         StatusCodes.OK,
@@ -477,11 +532,45 @@ export const verifyOtpCommon = async (req, res) => {
   }
 };
 //#endregion
-
 //#region Send OTP Common
 export const sendOtp = async (req, res) => {
   try {
     const { email, type } = req.body;
+
+    if (type === 'schoolRegistration') {
+      const school = await School.findOne({ email });
+      if (!school) {
+        return ResponseHandler(
+          res,
+          StatusCodes.NOT_FOUND,
+          responseMessage.SCHOOL_NOT_FOUND_1
+        );
+      }
+      const rateLimit = await checkOtpRateLimit('school', email);
+      if (rateLimit.limited) {
+        return ResponseHandler(
+          res,
+          StatusCodes.TOO_MANY_REQUESTS,
+          rateLimit.message
+        );
+      }
+
+      const otp = await generateOtp();
+      await storeOtp('admin', email, otp); // Same as registration
+
+      const { sendSubscriptionBaseMail } =
+        await import('../../services/EmailServices.js');
+      sendSubscriptionBaseMail(`<span style="color:#4f46e5;">${otp}</span>`, [
+        email,
+      ]).catch((err) => logger.error(`Error sending OTP email: ${err}`));
+
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.OTP_RESENT_SUCCESSFULLY
+      );
+    }
+
     const developer = await DeveloperAdmin.findOne({ email, isDeleted: false });
 
     if (!developer) {

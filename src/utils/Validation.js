@@ -191,7 +191,20 @@ const schoolRegisterSchema = joi.object({
   email: joistring.email().required().label('Email'),
   phoneNumber: joistring.required().label('Phone number'),
   schoolCode: joistring.required().label('School code'),
-  referralId: joistring.optional().allow('').label('Referral ID'),
+  address: joistring.required().label('Address'),
+  country: joistring.required().label('Country'),
+  state: joistring.required().label('State'),
+  city: joistring.required().label('City'),
+  zipCode: joistring.required().label('Pincode'),
+  board: joistring
+    .valid('CBSE', 'GSEB', 'ICSE', 'Other')
+    .required()
+    .label('Board'),
+  schoolType: joistring
+    .valid('Primary', 'Secondary', 'Higher Secondary')
+    .required()
+    .label('School Type'),
+  logo: joistring.optional().allow('').label('Logo'),
   password: joiPassword
     .string()
     .min(8)
@@ -327,7 +340,7 @@ const developerVerifyOtpCommonSchema = joi.object({
   email: joistring.email().required().label('Email'),
   otp: joistring.required().length(6).label('OTP'),
   type: joistring
-    .valid('login', 'registration', 'forgotPassword')
+    .valid('login', 'registration', 'forgotPassword', 'schoolRegistration')
     .required()
     .label('Type'),
 });
@@ -335,7 +348,7 @@ const developerVerifyOtpCommonSchema = joi.object({
 const developerSendOtpCommonSchema = joi.object({
   email: joistring.email().required().label('Email'),
   type: joistring
-    .valid('login', 'registration', 'forgotPassword')
+    .valid('login', 'registration', 'forgotPassword', 'schoolRegistration')
     .required()
     .label('Type'),
 });
