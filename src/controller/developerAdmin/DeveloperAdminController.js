@@ -139,13 +139,8 @@ export const addEditAdminProfile = async (req, res) => {
 //#region 📄 Get All Admins
 export const getAllAdmins = async (req, res) => {
   try {
-    const {
-      pageNumber,
-      perPageData,
-      searchRequest,
-      isActive,
-      isLogin,
-    } = req.query;
+    const { pageNumber, perPageData, searchRequest, isActive, isLogin } =
+      req.query;
     const result = await queryBuilder(DeveloperAdmin, {
       pageNumber,
       perPageData,
