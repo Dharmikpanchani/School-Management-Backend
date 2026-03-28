@@ -146,6 +146,13 @@ developerRoutes.post(
   validator('schoolRegisterSchema'),
   SchoolController.schoolRegister
 );
+
+developerRoutes.get(
+  '/get-all-schools',
+  developerAuth,
+  checkPermission(developerRolePermissionList.school.read),
+  SchoolController.getAllSchools
+);
 //#endregion
 
 export default developerRoutes;

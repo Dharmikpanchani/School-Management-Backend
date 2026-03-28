@@ -90,6 +90,23 @@ adminRoutes.patch(
   AdminController.updateProfile
 );
 
+adminRoutes.post(
+  '/get-school-image',
+  validator('getSchoolImageSchema'),
+  SchoolController.getSchoolImageByCode
+);
+
+// Fully protected Root school Routes (No RBAC Needed)
+adminRoutes.get('/school-profile', adminAuth, SchoolController.getProfile);
+adminRoutes.post(
+  '/school-update-profile',
+  adminAuth,
+  MediaUpload(),
+  validator('schoolUpdateProfileSchema'),
+  SchoolController.updateProfile
+);
+
+
 adminRoutes.get(
   '/get-all-admins',
   adminAuth,

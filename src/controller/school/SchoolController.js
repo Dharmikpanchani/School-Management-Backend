@@ -71,7 +71,7 @@ export const schoolRegister = async (req, res) => {
       phoneNumber,
       schoolCode,
       password: schoolPassword,
-      referralId: req.admin_id,
+      referralId: req.developer_id,
       address,
       city,
       state,
@@ -231,7 +231,15 @@ export const updateProfile = async (req, res) => {
 //#region get all Schools
 export const getAllSchools = async (req, res) => {
   try {
-    const data = await School.find();
+    const isSuperDeveloper = req.developer.developerType === 'super_developer';
+    const filter = { isDeleted: false };
+
+    if (!isSuperDeveloper) {
+      filter.referralId = req.developer._id;
+    }
+
+    const data = await School.find(filter);
+
     return ResponseHandler(
       res,
       StatusCodes.OK,
@@ -341,4 +349,33 @@ export const updateSchoolById = async (req, res) => {
     return CatchErrorHandler(res, error);
   }
 };
+
+//#region get school image by code
+export const getSchoolImageByCode = async (req, res) => {
+  try {
+    const { schoolCode } = req.body;
+    const school = await School.findOne({ schoolCode, isDeleted: false }).select(
+      'logo schoolName'
+    );
+
+    if (!school) {
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.SCHOOL_NOT_FOUND
+      );
+    }
+
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.SCHOOL_RETRIEVED_SUCCESSFULLY,
+      { logo: school.logo, schoolName: school.schoolName }
+    );
+  } catch (error) {
+    logger.error(`Get School Image By Code error: ${error}`);
+    return CatchErrorHandler(res, error);
+  }
+};
 //#endregion
+

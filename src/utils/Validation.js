@@ -222,6 +222,10 @@ const schoolVerifyEmailSchema = joi.object({
   otp: joistring.required().length(6).label('OTP'),
 });
 
+const getSchoolImageSchema = joi.object({
+  schoolCode: joistring.required().label('School Code'),
+});
+
 const schoolResendOtpSchema = joi.object({
   email: joistring.email().required().label('Email'),
 });
@@ -370,4 +374,5 @@ export default {
   adminVerifyLoginOtpSchema,
   developerVerifyOtpCommonSchema,
   developerSendOtpCommonSchema,
+  getSchoolImageSchema,
 };
