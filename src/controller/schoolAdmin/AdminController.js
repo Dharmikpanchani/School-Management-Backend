@@ -124,23 +124,22 @@ export const login = async (req, res) => {
   }
 };
 
-export const verifyLoginOtp = async (req, res) => {
+//#region verifyOtpCommon (Login, Registration, ForgotPassword)
+export const verifyOtpCommon = async (req, res) => {
   try {
-    const { email, otp, schoolCode } = req.body;
+    const { email, otp, type, schoolCode, school_id } = req.body;
 
-    const findSchool = await School.findOne({ schoolCode, isDeleted: false });
-    if (!findSchool) {
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        responseMessage.SCHOOL_NOT_EXIST
-      );
+    let findSchool;
+    if (schoolCode) {
+      findSchool = await School.findOne({ schoolCode, isDeleted: false });
+    } else if (school_id) {
+      findSchool = await School.findById(school_id);
     }
 
     const admin = await SchoolAdmin.findOne({
       email,
       isDeleted: false,
-      schoolId: findSchool._id,
+      ...(findSchool && { schoolId: findSchool._id }),
     });
 
     if (!admin) {
@@ -151,33 +150,69 @@ export const verifyLoginOtp = async (req, res) => {
       );
     }
 
-    const otpResult = await verifyOtp('admin_login', email, otp);
+    let otpNamespace = '';
+    if (type === 'login') otpNamespace = 'admin_login';
+    else if (type === 'registration') otpNamespace = 'admin';
+    else if (type === 'forgotPassword') otpNamespace = 'admin_forgot';
+    else
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        'Invalid OTP type'
+      );
+
+    const otpResult = await verifyOtp(otpNamespace, email, otp);
     if (!otpResult.success) {
+      if (
+        type === 'registration' &&
+        otpResult.maxAttemptsReached &&
+        !admin.isVerified
+      ) {
+        await SchoolAdmin.deleteOne({ _id: admin._id });
+        return ResponseHandler(
+          res,
+          StatusCodes.BAD_REQUEST,
+          responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE
+        );
+      }
       return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
     }
 
-    const payload = { id: admin._id, type: 'admin' };
-    const accessToken = generateAccessToken(payload);
-    const refreshToken = generateRefreshToken(payload);
+    if (type === 'login') {
+      const payload = { id: admin._id, type: 'admin' };
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
 
-    setRefreshTokenCookie(res, refreshToken);
-    admin.isLogin = true;
-    await admin.save();
+      setRefreshTokenCookie(res, refreshToken);
+      admin.isLogin = true;
+      await admin.save();
 
-    const adminData = admin.toObject();
-    delete adminData.password;
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
+        { accessToken }
+      );
+    } else if (type === 'registration') {
+      admin.isVerified = true;
+      admin.isActive = true;
+      await admin.save();
 
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.ADMIN_LOGIN_SUCCESSFULLY,
-      { accessToken }
-    );
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_
+      );
+    } else if (type === 'forgotPassword') {
+      return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_VERIFIED);
+    }
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
   }
 };
+//#endregion
+
 
 export const refreshToken = async (req, res) => {
   try {
@@ -291,42 +326,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-export const verifyForgotPasswordOtp = async (req, res) => {
-  try {
-    const { email, otp, schoolCode } = req.body;
-    const findSchool = await School.findOne({ schoolCode, isDeleted: false });
-    if (!findSchool) {
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        responseMessage.SCHOOL_NOT_EXIST
-      );
-    }
-    const admin = await SchoolAdmin.findOne({
-      email,
-      isDeleted: false,
-      schoolId: findSchool._id,
-    });
-    if (!admin) {
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        responseMessage.ADMIN_NOT_EXIST
-      );
-    }
 
-    // Verify OTP via Redis (same service used across the app)
-    const otpResult = await verifyOtp('admin_forgot', email, otp);
-    if (!otpResult.success) {
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
-    }
-
-    return ResponseHandler(res, StatusCodes.OK, responseMessage.OTP_VERIFIED);
-  } catch (error) {
-    logger.error(error);
-    return CatchErrorHandler(res, error);
-  }
-};
 
 export const resetPassword = async (req, res) => {
   try {
@@ -601,103 +601,82 @@ export const addEditAdminProfile = async (req, res) => {
 //#endregion
 
 //#region Verify SchoolAdmin Registration OTP
-export const verifyAdminRegistrationOtp = async (req, res) => {
-  try {
-    const { email, otp, school_id } = req.body;
-    const admin = await SchoolAdmin.findOne({
-      email,
-      isDeleted: false,
-      schoolId: school_id,
-    });
-    if (!admin)
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.ADMIN_NOT_FOUND
-      );
-    if (admin.isVerified)
-      return ResponseHandler(
-        res,
-        StatusCodes.BAD_REQUEST,
-        responseMessage.ADMIN_ALREADY_VERIFIED
-      );
 
-    const otpResult = await verifyOtp('admin', email, otp);
-    if (!otpResult.success) {
-      if (otpResult.maxAttemptsReached && !admin.isVerified) {
-        await SchoolAdmin.deleteOne({ _id: admin._id });
-        return ResponseHandler(
-          res,
-          StatusCodes.BAD_REQUEST,
-          responseMessage.TOO_MANY_OTP_ATTEMPTS_REGISTRATION_CANCE
-        );
-      }
-      return ResponseHandler(res, StatusCodes.BAD_REQUEST, otpResult.message);
-    }
-
-    admin.isVerified = true;
-    admin.isActive = true;
-    await admin.save();
-
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.ADMIN_VERIFIED_SUCCESSFULLY_YOU_CAN_NOW_
-    );
-  } catch (error) {
-    logger.error(error);
-    return CatchErrorHandler(res, error);
-  }
-};
 //#endregion
 
 //#region 🔁 Resend Registration OTP
-export const resendOtp = async (req, res) => {
+//#region sendOtp (Common for Login, Registration, ForgotPassword)
+export const sendOtp = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, type, schoolCode, school_id } = req.body;
+
+    let findSchool;
+    if (schoolCode) {
+      findSchool = await School.findOne({ schoolCode, isDeleted: false });
+    } else if (school_id) {
+      findSchool = await School.findById(school_id);
+    } else if (req.school_id) {
+      findSchool = { _id: req.school_id }; // Legacy support for protected resend
+    }
 
     const admin = await SchoolAdmin.findOne({
       email,
       isDeleted: false,
-      schoolId: req.school_id,
+      ...(findSchool && { schoolId: findSchool._id }),
     });
-    if (!admin)
+
+    if (!admin) {
       return ResponseHandler(
         res,
         StatusCodes.NOT_FOUND,
         responseMessage.ADMIN_NOT_FOUND
       );
-    if (admin.isVerified)
+    }
+
+    let otpNamespace = '';
+    if (type === 'login') otpNamespace = 'admin_login';
+    else if (type === 'registration') otpNamespace = 'admin';
+    else if (type === 'forgotPassword') otpNamespace = 'admin_forgot';
+    else
+      return ResponseHandler(res, StatusCodes.BAD_REQUEST, 'Invalid OTP type');
+
+    if (type === 'registration' && admin.isVerified) {
       return ResponseHandler(
         res,
         StatusCodes.BAD_REQUEST,
         responseMessage.ADMIN_IS_ALREADY_VERIFIED_NO_OTP_NEEDED
       );
+    }
 
-    // Rate limit check before sending a new OTP
-    const rateLimit = await checkOtpRateLimit('admin', email);
-    if (rateLimit.limited)
+    const rateLimit = await checkOtpRateLimit(otpNamespace, email);
+    if (rateLimit.limited) {
       return ResponseHandler(
         res,
         StatusCodes.TOO_MANY_REQUESTS,
         rateLimit.message
       );
+    }
 
     const otp = generateOtp();
-    await storeOtp('admin', email, otp);
-    sendRegisterVerificationEmail(
-      `Your SchoolAdmin Register OTP is: ${otp}`,
-      email,
-      'SchoolAdmin'
-    ).catch((err) =>
-      logger.error(`Error re-sending SchoolAdmin Registration OTP: ${err}`)
-    );
+    await storeOtp(otpNamespace, email, otp);
+
+    if (type === 'login') {
+      await sendRegisterVerificationEmail(otp, email, 'SuperAdmin', 'Login');
+    } else if (type === 'registration') {
+      sendRegisterVerificationEmail(
+        `Your SchoolAdmin Register OTP is: ${otp}`,
+        email,
+        'SchoolAdmin',
+        'Register'
+      ).catch((err) => logger.error(err));
+    } else if (type === 'forgotPassword') {
+      await forgotPasswordOtpMail(email, otp);
+    }
 
     return ResponseHandler(
       res,
       StatusCodes.OK,
-      responseMessage.OTP_SENT_SUCCESSFULLY,
-      null
+      responseMessage.OTP_SENT_SUCCESSFULLY
     );
   } catch (error) {
     logger.error(error);
@@ -706,49 +685,6 @@ export const resendOtp = async (req, res) => {
 };
 //#endregion
 
-//#region 🔁 Resend Forgot Password OTP
-export const resendForgotPasswordOtp = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    const admin = await SchoolAdmin.findOne({
-      email,
-      isDeleted: false,
-      schoolId: req.school_id,
-    });
-    if (!admin)
-      return ResponseHandler(
-        res,
-        StatusCodes.NOT_FOUND,
-        responseMessage.ADMIN_NOT_FOUND
-      );
-
-    // Rate limit check
-    const rateLimit = await checkOtpRateLimit('admin_forgot', email);
-    if (rateLimit.limited)
-      return ResponseHandler(
-        res,
-        StatusCodes.TOO_MANY_REQUESTS,
-        rateLimit.message
-      );
-
-    // Generate & store fresh OTP in Redis (forgot namespace)
-    const otp = generateOtp();
-    await storeOtp('admin_forgot', email, otp);
-
-    await forgotPasswordOtpMail(email, otp);
-
-    return ResponseHandler(
-      res,
-      StatusCodes.OK,
-      responseMessage.OTP_SENT_SUCCESSFULLY,
-      null
-    );
-  } catch (error) {
-    logger.error(error);
-    return CatchErrorHandler(res, error);
-  }
-};
 //#endregion
 
 //#region 📄 Get All Admins

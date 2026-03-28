@@ -357,6 +357,27 @@ const developerSendOtpCommonSchema = joi.object({
     .label('Type'),
 });
 
+const adminVerifyOtpCommonSchema = joi.object({
+  email: joistring.email().required().label('Email'),
+  otp: joistring.required().length(6).label('OTP'),
+  type: joistring
+    .valid('login', 'registration', 'forgotPassword')
+    .required()
+    .label('Type'),
+  schoolCode: joistring.optional().label('School Code'),
+  school_id: joistring.optional().label('School ID'),
+});
+
+const adminSendOtpCommonSchema = joi.object({
+  email: joistring.email().required().label('Email'),
+  type: joistring
+    .valid('login', 'registration', 'forgotPassword')
+    .required()
+    .label('Type'),
+  schoolCode: joistring.optional().label('School Code'),
+  school_id: joistring.optional().label('School ID'),
+});
+
 export default {
   adminLoginSchema,
   changePasswordSchema,
@@ -375,4 +396,6 @@ export default {
   developerVerifyOtpCommonSchema,
   developerSendOtpCommonSchema,
   getSchoolImageSchema,
+  adminVerifyOtpCommonSchema,
+  adminSendOtpCommonSchema,
 };

@@ -14,22 +14,32 @@ const adminRoutes = Router();
 //#region Admin authentication routes
 adminRoutes.use('/login', authLimiter);
 adminRoutes.use('/register', authLimiter);
-adminRoutes.use('/verify-email', authLimiter);
-adminRoutes.use('/re-send-otp', authLimiter);
-adminRoutes.use('/resend-forgot-otp', authLimiter);
+adminRoutes.use('/verify-otp', authLimiter);
 
 adminRoutes.post(
-  '/login',
-  validator('adminLoginSchema'),
-  AdminController.login
+  '/get-school-image',
+  validator('getSchoolImageSchema'),
+  SchoolController.getSchoolImageByCode
 );
 
+// Fully protected Root school Routes (No RBAC Needed)
+adminRoutes.get('/school-profile', adminAuth, SchoolController.getProfile);
 adminRoutes.post(
-  '/verify-login-otp',
+  '/school-update-profile',
+  adminAuth,
+  MediaUpload(),
+  validator('schoolUpdateProfileSchema'),
+  SchoolController.updateProfile
+);
+
+adminRoutes.post('/login', validator('adminLoginSchema'), AdminController.login);
+adminRoutes.post(
+  '/verify-otp',
   authLimiter,
-  validator('adminVerifyLoginOtpSchema'),
-  AdminController.verifyLoginOtp
+  validator('adminVerifyOtpCommonSchema'),
+  AdminController.verifyOtpCommon
 );
+
 
 adminRoutes.post(
   '/add-edit-admin',
@@ -46,31 +56,19 @@ adminRoutes.post(
 adminRoutes.post('/logout', refreshTokenAuth, AdminController.logout);
 
 adminRoutes.post(
-  '/verify-registration-otp',
-  authLimiter,
-  validator('adminVerifyRegistrationOtpSchema'),
-  AdminController.verifyAdminRegistrationOtp
-);
-adminRoutes.post(
-  '/re-send-otp',
-  validator('adminForgotPasswordSchema'),
-  AdminController.resendOtp
-);
-adminRoutes.post(
   '/forgot-password',
   validator('adminForgotPasswordSchema'),
   AdminController.forgotPassword
 );
+
+
 adminRoutes.post(
-  '/verify-otp',
-  validator('adminForgotPasswordSchema'),
-  AdminController.verifyForgotPasswordOtp
+  '/re-send-otp',
+  authLimiter,
+  validator('adminSendOtpCommonSchema'),
+  AdminController.sendOtp
 );
-adminRoutes.post(
-  '/resend-forgot-otp',
-  validator('adminForgotPasswordSchema'),
-  AdminController.resendForgotPasswordOtp
-);
+
 adminRoutes.post(
   '/reset-password',
   validator('adminResetPasswordSchema'),
@@ -88,22 +86,6 @@ adminRoutes.patch(
   adminAuth,
   MediaUpload(),
   AdminController.updateProfile
-);
-
-adminRoutes.post(
-  '/get-school-image',
-  validator('getSchoolImageSchema'),
-  SchoolController.getSchoolImageByCode
-);
-
-// Fully protected Root school Routes (No RBAC Needed)
-adminRoutes.get('/school-profile', adminAuth, SchoolController.getProfile);
-adminRoutes.post(
-  '/school-update-profile',
-  adminAuth,
-  MediaUpload(),
-  validator('schoolUpdateProfileSchema'),
-  SchoolController.updateProfile
 );
 
 adminRoutes.get(
