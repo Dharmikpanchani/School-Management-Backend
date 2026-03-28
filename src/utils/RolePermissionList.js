@@ -16,25 +16,56 @@ export const rolePermissionList = {
 };
 
 export const developerRolePermissionList = {
-  sales: {
-    create: 'developer_sales_create',
-    read: 'developer_sales_read',
-    update: 'developer_sales_update',
-    delete: 'developer_sales_delete',
-    status: 'developer_sales_status',
+  dashboard: {
+    read: "dashboard_view",
   },
-  admin_users: {
-    read: 'developer_admin_users_read',
-    create: 'developer_admin_users_create',
-    update: 'developer_admin_users_update',
-    delete: 'developer_admin_users_delete',
-    status: 'developer_admin_users_status',
+  school: {
+    create: "school_add",
+    update: "school_edit",
+    read: "school_view",
+    delete: "school_delete",
+    status: "school_status",
   },
-  roles: {
-    read: 'developer_roles_read',
-    create: 'developer_roles_create',
-    update: 'developer_roles_update',
-    delete: 'developer_roles_delete',
-    status: 'developer_roles_status',
+  role: {
+    create: "admin_role_add",
+    update: "admin_role_edit",
+    read: "admin_role_view",
+    delete: "admin_role_delete",
+    status: "admin_role_status",
+  },
+  admin_user: {
+    create: "admin_user_add",
+    update: "admin_user_edit",
+    read: "admin_user_view",
+    delete: "admin_user_delete",
+    status: "admin_user_status",
+  },
+  user: {
+    read: "user_view",
+    delete: "user_delete",
+    status: "user_status",
+  },
+  faq: {
+    create: "faq_add",
+    update: "faq_edit",
+    read: "faq_view",
+    delete: "faq_delete",
+    status: "faq_status",
+  },
+  about_us: {
+    create: "about_us_add",
+    update: "about_us_edit",
+    read: "about_us_view",
+    delete: "about_us_delete",
+    status: "about_us_status",
+  },
+  contact_us: {
+    read: "contact_view",
+    delete: "contact_delete",
+  },
+  cms: {
+    terms_edit: "terms_and_condition_edit",
+    privacy_edit: "privacy_policy_edit",
+    about_edit: "about_us_edit",
   },
 };

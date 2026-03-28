@@ -75,35 +75,35 @@ developerRoutes.patch(
 developerRoutes.post(
   '/add-edit-admin',
   developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.create),
+  checkPermission(developerRolePermissionList.admin_user.create),
   DeveloperAdminController.addEditAdminProfile
 );
 
 developerRoutes.get(
   '/get-all-admins',
   developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.read),
+  checkPermission(developerRolePermissionList.admin_user.read),
   DeveloperAdminController.getAllAdmins
 );
 
 developerRoutes.get(
   '/get-admin/:id',
   developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.read),
+  checkPermission(developerRolePermissionList.admin_user.read),
   DeveloperAdminController.getAdminById
 );
 
 developerRoutes.delete(
   '/delete-admin/:id',
   developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.delete),
+  checkPermission(developerRolePermissionList.admin_user.delete),
   DeveloperAdminController.deleteAdmin
 );
 
 developerRoutes.post(
   '/admin-action-status/:id',
   developerAuth,
-  checkPermission(developerRolePermissionList.admin_users.status),
+  checkPermission(developerRolePermissionList.admin_user.status),
   DeveloperAdminController.adminStatusHandler
 );
 //#endregion
@@ -112,25 +112,25 @@ developerRoutes.post(
 developerRoutes.post(
   '/add-edit-role',
   developerAuth,
-  checkPermission(developerRolePermissionList.roles.create),
+  checkPermission(developerRolePermissionList.role.create),
   DeveloperRolePermissionController.addEditRole
 );
 developerRoutes.get(
-  '/get-all-roles',
+  '/get-all-role',
   developerAuth,
-  checkPermission(developerRolePermissionList.roles.read),
+  checkPermission(developerRolePermissionList.role.read),
   DeveloperRolePermissionController.getAllRoles
 );
 developerRoutes.get(
   '/get-role/:id',
   developerAuth,
-  checkPermission(developerRolePermissionList.roles.read),
+  checkPermission(developerRolePermissionList.role.read),
   DeveloperRolePermissionController.getRoleById
 );
 developerRoutes.delete(
   '/delete-role/:id',
   developerAuth,
-  checkPermission(developerRolePermissionList.roles.delete),
+  checkPermission(developerRolePermissionList.role.delete),
   checkRoleInUse,
   DeveloperRolePermissionController.deleteRole
 );
