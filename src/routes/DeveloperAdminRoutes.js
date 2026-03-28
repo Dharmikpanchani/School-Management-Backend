@@ -116,7 +116,7 @@ developerRoutes.post(
   DeveloperRolePermissionController.addEditRole
 );
 developerRoutes.get(
-  '/get-all-role',
+  '/get-all-roles',
   developerAuth,
   checkPermission(developerRolePermissionList.role.read),
   DeveloperRolePermissionController.getAllRoles
