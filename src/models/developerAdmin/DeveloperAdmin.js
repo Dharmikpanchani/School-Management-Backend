@@ -60,6 +60,10 @@ const DeveloperSchema = new mongoose.Schema(
       enum: ['super_developer', 'developer'],
       default: 'developer',
     },
+    isReferralAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

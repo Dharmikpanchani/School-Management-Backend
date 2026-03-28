@@ -86,6 +86,13 @@ developerRoutes.get(
   DeveloperAdminController.getAllAdmins
 );
 
+developerRoutes.get(
+  '/get-admin/:id',
+  developerAuth,
+  checkPermission(developerRolePermissionList.admin_users.read),
+  DeveloperAdminController.getAdminById
+);
+
 developerRoutes.delete(
   '/delete-admin/:id',
   developerAuth,

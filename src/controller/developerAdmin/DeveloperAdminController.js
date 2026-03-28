@@ -22,10 +22,19 @@ const logger = new Logger(
 //#region ➕ Add / ✏️ Edit DeveloperAdmin Profile
 export const addEditAdminProfile = async (req, res) => {
   try {
-    const { id, name, email, password, role, address } = req.body;
+    const {
+      id,
+      name,
+      email,
+      password,
+      role,
+      address,
+      phoneNumber,
+      isReferralAdmin,
+    } = req.body;
 
     // DeveloperAdmin assigns schoolId explicitly
-    const payload = { name, email, address };
+    const payload = { name, email, address, phoneNumber, isReferralAdmin };
 
     if (password) {
       payload.password = await encryptPassword(password);
@@ -135,7 +144,6 @@ export const getAllAdmins = async (req, res) => {
       perPageData,
       searchRequest,
       isActive,
-      isVerified,
       isLogin,
     } = req.query;
     const result = await queryBuilder(DeveloperAdmin, {
@@ -150,7 +158,7 @@ export const getAllAdmins = async (req, res) => {
 
       filters: {
         isActive,
-        isVerified,
+        isVerified: true,
         isLogin,
       },
 
@@ -162,6 +170,36 @@ export const getAllAdmins = async (req, res) => {
       data: result.data,
     };
     return ResponseHandler(res, 200, responseMessage.ADMIN_FETCH_SUCCESS, data);
+  } catch (error) {
+    logger.error(error);
+    return CatchErrorHandler(res, error);
+  }
+};
+//#endregion
+
+//#region 📄 Get Admin By Id
+export const getAdminById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const admin = await DeveloperAdmin.findOne({
+      _id: id,
+      isDeleted: false,
+    }).populate({ path: 'role', select: 'role isActive' });
+
+    if (!admin) {
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.ADMIN_NOT_FOUND
+      );
+    }
+
+    return ResponseHandler(
+      res,
+      200,
+      responseMessage.ADMIN_FETCH_SUCCESS,
+      admin
+    );
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);
