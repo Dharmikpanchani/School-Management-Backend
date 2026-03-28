@@ -139,8 +139,26 @@ export const addEditAdminProfile = async (req, res) => {
 //#region 📄 Get All Admins
 export const getAllAdmins = async (req, res) => {
   try {
-    const { pageNumber, perPageData, searchRequest, isActive, isLogin, role } =
-      req.query;
+    const {
+      pageNumber,
+      perPageData,
+      searchRequest,
+      isActive,
+      isLogin,
+      role,
+      adminType,
+    } = req.query;
+
+    const extraFilters = {};
+    if (adminType === 'super_admin') {
+      extraFilters.developerType = 'super_developer';
+    } else if (adminType === 'admin') {
+      extraFilters.developerType = 'developer';
+      extraFilters.isReferralAdmin = false;
+    } else if (adminType === 'reffral') {
+      extraFilters.isReferralAdmin = true;
+    }
+
     const result = await queryBuilder(DeveloperAdmin, {
       pageNumber,
       perPageData,
@@ -156,6 +174,7 @@ export const getAllAdmins = async (req, res) => {
         isVerified: true,
         isLogin,
         role,
+        ...extraFilters,
       },
 
       populate: [{ path: 'role', select: 'role isActive' }],
