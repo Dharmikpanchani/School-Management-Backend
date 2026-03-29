@@ -153,6 +153,27 @@ developerRoutes.get(
   checkPermission(developerRolePermissionList.school.read),
   SchoolController.getAllSchools
 );
+
+developerRoutes.get(
+  '/get-school/:schoolId',
+  developerAuth,
+  checkPermission(developerRolePermissionList.school.read),
+  SchoolController.getSchoolById
+);
+
+developerRoutes.post(
+  '/school-status/:schoolId',
+  developerAuth,
+  checkPermission(developerRolePermissionList.school.status),
+  SchoolController.schoolStatusHandler
+);
+
+developerRoutes.delete(
+  '/delete-school/:schoolId',
+  developerAuth,
+  checkPermission(developerRolePermissionList.school.delete),
+  SchoolController.deleteSchool
+);
 //#endregion
 
 export default developerRoutes;

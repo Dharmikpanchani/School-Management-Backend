@@ -141,4 +141,8 @@ export const responseMessage = {
   TRANSACTION_NOT_FOUND: 'Transaction not found',
   ALREADY_PROCESSED: 'Already processed',
   FAILED_TO_FETCH_TRANSACTION: 'Failed to fetch transactions',
+
+  SCHOOL_STATUS_UPDATED: 'School status updated successfully.',
+  SCHOOL_DELETE_SUCCESS: 'School deleted successfully.',
+  SCHOOL_CANNOT_BE_DELETED_ALREADY_VERIFIED: 'Verified schools cannot be deleted.',
 };

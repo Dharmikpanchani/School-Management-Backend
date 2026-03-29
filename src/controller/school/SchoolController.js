@@ -447,4 +447,69 @@ export const getSchoolImageByCode = async (req, res) => {
     return CatchErrorHandler(res, error);
   }
 };
+//#region school status handler
+export const schoolStatusHandler = async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    const school = await School.findOne({ _id: schoolId, isDeleted: false });
+
+    if (!school) {
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.SCHOOL_NOT_FOUND
+      );
+    }
+
+    school.isActive = !school.isActive;
+    await school.save();
+
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.SCHOOL_STATUS_UPDATED,
+      school
+    );
+  } catch (error) {
+    logger.error(`School Status Handler error: ${error}`);
+    return CatchErrorHandler(res, error);
+  }
+};
+//#endregion
+
+//#region delete school
+export const deleteSchool = async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    const school = await School.findOne({ _id: schoolId, isDeleted: false });
+
+    if (!school) {
+      return ResponseHandler(
+        res,
+        StatusCodes.NOT_FOUND,
+        responseMessage.SCHOOL_NOT_FOUND
+      );
+    }
+
+    if (school.isVerified) {
+      return ResponseHandler(
+        res,
+        StatusCodes.BAD_REQUEST,
+        responseMessage.SCHOOL_CANNOT_BE_DELETED_ALREADY_VERIFIED
+      );
+    }
+
+    school.isDeleted = true;
+    await school.save();
+
+    return ResponseHandler(
+      res,
+      StatusCodes.OK,
+      responseMessage.SCHOOL_DELETE_SUCCESS
+    );
+  } catch (error) {
+    logger.error(`Delete School error: ${error}`);
+    return CatchErrorHandler(res, error);
+  }
+};
 //#endregion
