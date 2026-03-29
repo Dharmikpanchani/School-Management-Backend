@@ -40,7 +40,7 @@ export const verifyOtp = async (type, identifier, inputOtp) => {
 
   // Increment attempt counter
   const attempts = await redis.incr(attemptsKey);
-  if (attempts > MAX_ATTEMPTS) {
+  if (attempts >= MAX_ATTEMPTS) {
     await deleteOtp(type, identifier);
     return {
       success: false,
@@ -53,7 +53,7 @@ export const verifyOtp = async (type, identifier, inputOtp) => {
     const remaining = MAX_ATTEMPTS - attempts;
     return {
       success: false,
-      message: `Invalid OTP. ${remaining} attempts remaining.`,
+      message: `Invalid OTP. ${remaining == 0 ? 'Last' : remaining} attempts remaining.`,
     };
   }
 
