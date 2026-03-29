@@ -144,6 +144,7 @@ export const getAllAdmins = async (req, res) => {
       perPageData,
       searchRequest,
       isActive,
+      isVerified,
       isLogin,
       role,
       adminType,
@@ -171,7 +172,7 @@ export const getAllAdmins = async (req, res) => {
 
       filters: {
         isActive,
-        isVerified: true,
+        isVerified,
         isLogin,
         role,
         ...extraFilters,
