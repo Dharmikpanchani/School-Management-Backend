@@ -132,6 +132,7 @@ export const responseMessage = {
   ROLE_ID_IS_REQUIRED: 'Role ID is required',
   ROLE_IS_ASSIGNED_TO_ADMINS: 'Role is assigned to admins',
   ROLE_IS_ASSIGNED_TO_USERS: 'Role is assigned to users',
+  ROLE_IS_ASSIGNED_TO_DEVELOPER_ADMINS: 'Role is assigned to Developer Admins',
 
   AMOUNT_REQUIRED: 'Amount is required',
   ORDER_CREATION_FAILED: 'Order creation failed',

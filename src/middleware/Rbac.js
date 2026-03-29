@@ -5,6 +5,7 @@ import {
 } from '../services/CommonServices.js';
 import SchoolAdmin from '../models/schoolAdmin/SchoolAdmin.js';
 import User from '../models/user/User.js';
+import DeveloperAdmin from '../models/developerAdmin/DeveloperAdmin.js';
 import { responseMessage } from '../utils/ResponseMessage.js';
 
 import Logger from '../utils/Logger.js';
@@ -108,6 +109,18 @@ export const checkRoleInUse = async (req, res, next) => {
         res,
         StatusCodes.CONFLICT,
         responseMessage.ROLE_IS_ASSIGNED_TO_USERS
+      );
+    }
+
+    const developerExists = await DeveloperAdmin.exists({
+      role: id,
+      isDeleted: false,
+    });
+    if (developerExists) {
+      return ResponseHandler(
+        res,
+        StatusCodes.CONFLICT,
+        responseMessage.ROLE_IS_ASSIGNED_TO_DEVELOPER_ADMINS
       );
     }
 
