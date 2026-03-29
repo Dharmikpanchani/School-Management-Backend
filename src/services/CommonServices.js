@@ -142,7 +142,13 @@ export const queryBuilder = async (model, options = {}) => {
       });
     }
 
-    query.$or = orConditions;
+    if (options.extraOrConditions && Array.isArray(options.extraOrConditions)) {
+      orConditions.push(...options.extraOrConditions);
+    }
+
+    if (orConditions.length > 0) {
+      query.$or = orConditions;
+    }
   }
 
   const page = parseInt(pageNumber);

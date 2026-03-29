@@ -1,9 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 import School from '../../models/school/School.js';
+import DeveloperAdmin from '../../models/developerAdmin/DeveloperAdmin.js';
 import {
   CatchErrorHandler,
   ResponseHandler,
   encryptPassword,
+  queryBuilder,
 } from '../../services/CommonServices.js';
 import Logger from '../../utils/Logger.js';
 import {
@@ -231,14 +233,81 @@ export const updateProfile = async (req, res) => {
 //#region get all Schools
 export const getAllSchools = async (req, res) => {
   try {
-    const isSuperDeveloper = req.developer.developerType === 'super_developer';
-    const filter = { isDeleted: false };
+    const {
+      pageNumber,
+      perPageData,
+      searchRequest,
+      isActive,
+      isVerified,
+      board,
+      schoolType,
+      referralId,
+    } = req.query;
 
+    const isSuperDeveloper = req.developer.developerType === 'super_developer';
+    
+    const filters = {
+      isActive,
+      isVerified,
+      board,
+      schoolType,
+      referralId,
+      isDeleted: false,
+    };
+
+    // If not a super developer, strictly restrict them to their own referralId
     if (!isSuperDeveloper) {
-      filter.referralId = req.developer._id;
+      filters.referralId = req.developer._id;
     }
 
-    const data = await School.find(filter);
+    let extraOrConditions = [];
+    if (searchRequest) {
+      const matchingAdmins = await DeveloperAdmin.find({
+        $or: [
+          { name: { $regex: searchRequest, $options: 'i' } },
+          { email: { $regex: searchRequest, $options: 'i' } },
+        ],
+        isDeleted: false,
+      }).select('_id');
+
+      if (matchingAdmins.length > 0) {
+        const adminIds = matchingAdmins.map((a) => a._id);
+        extraOrConditions.push({ referralId: { $in: adminIds } });
+      }
+    }
+
+    const result = await queryBuilder(School, {
+      pageNumber,
+      perPageData,
+      searchRequest,
+      searchableFields: [
+        'schoolName',
+        'ownerName',
+        'email',
+        'phoneNumber',
+        'address',
+        'city',
+        'state',
+        'zipCode',
+        'country',
+        'schoolCode',
+      ],
+      booleanFields: ['isActive', 'isVerified', 'isDeleted'],
+      dateFields: ['createdAt'],
+      nestedFields: [
+        'referralId.name',
+        'referralId.email',
+        'referralId.phoneNumber',
+      ],
+      extraOrConditions,
+      filters,
+      populate: [{ path: 'referralId', select: 'name email phoneNumber' }],
+    });
+
+    const data = {
+      pagination: result.pagination,
+      data: result.data,
+    };
 
     return ResponseHandler(
       res,

@@ -60,7 +60,7 @@ const SchoolSchema = new mongoose.Schema(
     },
     referralId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Referral',
+      ref: 'DeveloperAdmin',
       default: null,
     },
     isVerified: {
