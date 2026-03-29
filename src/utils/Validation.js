@@ -185,6 +185,35 @@ const adminResetPasswordSchema = joi.object().keys({
     .label('Confirm password'),
 });
 
+const commonImageValidation = (isRequired = true) => {
+  let schema = joi.any().custom((value, helpers) => {
+    if (!value) return value;
+    if (typeof value === 'string') return value; // Already uploaded filename or empty string
+
+    // Multer gives an object or array of objects
+    const file = Array.isArray(value) ? value[0] : value;
+    if (!file.mimetype || !file.size) return value; // Not a file object
+
+    const FILE_SIZE = 20 * 1024 * 1024; // 20MB
+    const SUPPORTED_FORMATS = [
+      'image/jpg',
+      'image/jpeg',
+      'image/png',
+      'image/svg+xml',
+    ];
+
+    if (file.size > FILE_SIZE) {
+      return helpers.message('File size must be less than 20MB');
+    }
+    if (!SUPPORTED_FORMATS.includes(file.mimetype)) {
+      return helpers.message('Only JPG, PNG, SVG allowed');
+    }
+    return value;
+  });
+
+  return isRequired ? schema.required() : schema.optional().allow('', null);
+};
+
 const schoolRegisterSchema = joi.object({
   schoolName: joistring.required().label('school name'),
   ownerName: joistring.required().label('Owner name'),
@@ -201,10 +230,16 @@ const schoolRegisterSchema = joi.object({
     .required()
     .label('Board'),
   schoolType: joistring
-    .valid('Primary', 'Secondary', 'Higher Secondary')
+    .valid(
+      'Primary',
+      'Secondary',
+      'Higher Secondary',
+      'Junior College',
+      'Other'
+    )
     .required()
     .label('School Type'),
-  logo: joistring.optional().allow('').label('Logo'),
+  logo: commonImageValidation(true).label('Logo'),
   password: joiPassword
     .string()
     .min(8)
@@ -239,7 +274,7 @@ const schoolUpdateProfileSchema = joi.object({
   state: joistring.optional().allow('').label('State'),
   zipCode: joistring.optional().allow('').label('Zip Code'),
   country: joistring.optional().allow('').label('Country'),
-  logo: joistring.optional().allow('').label('Logo'),
+  logo: commonImageValidation(false).label('Logo'),
 });
 
 const adminVerifyRegistrationOtpSchema = joi.object({

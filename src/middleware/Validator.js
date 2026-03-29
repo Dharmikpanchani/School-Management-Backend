@@ -13,13 +13,23 @@ export const validator = (validator) => {
           data: null,
         });
       }
-      const validated = await validation[validator].validateAsync(req.body, {
-        errors: {
-          wrap: {
-            label: '',
+      const dataToValidate = { ...req.body };
+      if (req.files) {
+        Object.keys(req.files).forEach((key) => {
+          dataToValidate[key] = req.files[key][0]; // Take the first file for validation
+        });
+      }
+
+      const validated = await validation[validator].validateAsync(
+        dataToValidate,
+        {
+          errors: {
+            wrap: {
+              label: '',
+            },
           },
-        },
-      });
+        }
+      );
 
       req.body = validated;
       next();
