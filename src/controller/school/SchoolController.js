@@ -245,7 +245,7 @@ export const getAllSchools = async (req, res) => {
     } = req.query;
 
     const isSuperDeveloper = req.developer.developerType === 'super_developer';
-    
+
     const filters = {
       isActive,
       isVerified,
