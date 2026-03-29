@@ -144,5 +144,6 @@ export const responseMessage = {
 
   SCHOOL_STATUS_UPDATED: 'School status updated successfully.',
   SCHOOL_DELETE_SUCCESS: 'School deleted successfully.',
-  SCHOOL_CANNOT_BE_DELETED_ALREADY_VERIFIED: 'Verified schools cannot be deleted.',
+  SCHOOL_CANNOT_BE_DELETED_ALREADY_VERIFIED:
+    'Verified schools cannot be deleted.',
 };
