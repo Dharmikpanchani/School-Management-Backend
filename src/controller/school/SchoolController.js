@@ -23,6 +23,7 @@ const logger = new Logger('./src/controller/school/SchoolController.js');
 export const schoolRegister = async (req, res) => {
   try {
     const {
+      id,
       schoolName,
       ownerName,
       email,
@@ -45,90 +46,157 @@ export const schoolRegister = async (req, res) => {
       longitude,
     } = req.body;
 
-    // 1. Check if school exists
-    const existingSchool = await School.findOne({
-      $or: [{ email }, { phoneNumber }, { schoolCode }],
-    });
-
-    if (existingSchool) {
-      return ResponseHandler(
-        res,
-        StatusCodes.CONFLICT,
-        responseMessage.SCHOOL_ALREADY_EXISTS
-      );
-    }
-
-    // 3. Hash Passwords
-    const schoolPassword = await encryptPassword(password);
-    const adminPass = await encryptPassword(password);
-
-    // 4. OTP Rate Limit
-    const rateLimit = await checkOtpRateLimit('school', email);
-    if (rateLimit.limited) {
-      return ResponseHandler(
-        res,
-        StatusCodes.TOO_MANY_REQUESTS,
-        rateLimit.message
-      );
-    }
-
-    const newSchool = await School.create({
-      schoolName,
-      ownerName,
-      email,
-      phoneNumber,
-      schoolCode,
-      password: schoolPassword,
-      referralId: req.developer_id,
-      address,
-      city,
-      state,
-      zipCode,
-      country,
-      board,
-      schoolType,
-      medium,
-      establishedYear,
-      registrationNumber,
-      gstNumber,
-      panNumber,
-      latitude,
-      longitude,
-      logo: req.logo || '',
-      banner: req.banner || '',
-      affiliationCertificate: req.affiliationCertificate || '',
-    });
-
-    // ✅ 6. CREATE DEFAULT ADMIN
-    const newAdmin = await SchoolAdmin.create({
-      name: ownerName,
-      email: email,
-      password: adminPass,
-      isSuperAdmin: true,
-      schoolId: newSchool._id,
-      isVerified: false,
-    });
-
-    // 8. OTP for SchoolAdmin
-    const otp = generateOtp();
-    await storeOtp('admin', newAdmin.email, otp);
-
-    sendRegisterVerificationEmail(
-      `Your School Register OTP is: ${otp}`,
-      newAdmin.email,
-      'School',
-      'Register'
-    ).catch((err) => logger.error(err));
-
-    return ResponseHandler(
-      res,
-      StatusCodes.CREATED,
-      responseMessage.SCHOOL_ADMIN_REGISTERED_SUCCESSFULLY_VER,
-      {
-        schoolEmail: newSchool.email,
-        adminEmail: newAdmin.email,
+    if (id) {
+      // 📝 UPDATE FLOW
+      const existingSchool = await School.findOne({ _id: id, isDeleted: false });
+      if (!existingSchool) {
+        return ResponseHandler(
+          res,
+          StatusCodes.NOT_FOUND,
+          responseMessage.SCHOOL_NOT_FOUND_1
+        );
       }
-    );
+
+      // Check for duplicates (excluding current school)
+      const duplicate = await School.findOne({
+        _id: { $ne: id },
+        $or: [{ email }, { phoneNumber }, { schoolCode }],
+        isDeleted: false,
+      });
+
+      if (duplicate) {
+        return ResponseHandler(
+          res,
+          StatusCodes.CONFLICT,
+          responseMessage.SCHOOL_ALREADY_EXISTS
+        );
+      }
+
+      const updateData = {
+        schoolName,
+        ownerName,
+        address,
+        city,
+        state,
+        zipCode,
+        country,
+        board,
+        schoolType,
+        medium,
+        establishedYear,
+        registrationNumber,
+        gstNumber,
+        panNumber,
+        latitude,
+        longitude,
+      };
+
+      if (password) {
+        updateData.password = await encryptPassword(password);
+      }
+      if (req.logo) updateData.logo = req.logo;
+      if (req.banner) updateData.banner = req.banner;
+      if (req.affiliationCertificate)
+        updateData.affiliationCertificate = req.affiliationCertificate;
+
+      const updatedSchool = await School.findByIdAndUpdate(id, updateData, {
+        new: true,
+      });
+
+      return ResponseHandler(
+        res,
+        StatusCodes.OK,
+        responseMessage.PROFILE_UPDATED,
+        updatedSchool
+      );
+    } else {
+      // 🆕 CREATE FLOW
+      // 1. Check if school exists
+      const existingSchool = await School.findOne({
+        $or: [{ email }, { phoneNumber }, { schoolCode }],
+        isDeleted: false,
+      });
+
+      if (existingSchool) {
+        return ResponseHandler(
+          res,
+          StatusCodes.CONFLICT,
+          responseMessage.SCHOOL_ALREADY_EXISTS
+        );
+      }
+
+      // 3. Hash Passwords
+      const schoolPassword = await encryptPassword(password);
+      const adminPass = await encryptPassword(password);
+
+      // 4. OTP Rate Limit
+      const rateLimit = await checkOtpRateLimit('school', email);
+      if (rateLimit.limited) {
+        return ResponseHandler(
+          res,
+          StatusCodes.TOO_MANY_REQUESTS,
+          rateLimit.message
+        );
+      }
+
+      const newSchool = await School.create({
+        schoolName,
+        ownerName,
+        email,
+        phoneNumber,
+        schoolCode,
+        password: schoolPassword,
+        referralId: req.developer_id,
+        address,
+        city,
+        state,
+        zipCode,
+        country,
+        board,
+        schoolType,
+        medium,
+        establishedYear,
+        registrationNumber,
+        gstNumber,
+        panNumber,
+        latitude,
+        longitude,
+        logo: req.logo || '',
+        banner: req.banner || '',
+        affiliationCertificate: req.affiliationCertificate || '',
+      });
+
+      // ✅ 6. CREATE DEFAULT ADMIN
+      const newAdmin = await SchoolAdmin.create({
+        name: ownerName,
+        email: email,
+        password: adminPass,
+        isSuperAdmin: true,
+        schoolId: newSchool._id,
+        isVerified: false,
+      });
+
+      // 8. OTP for SchoolAdmin
+      const otp = generateOtp();
+      await storeOtp('admin', newAdmin.email, otp);
+
+      sendRegisterVerificationEmail(
+        `Your School Register OTP is: ${otp}`,
+        newAdmin.email,
+        'School',
+        'Register'
+      ).catch((err) => logger.error(err));
+
+      return ResponseHandler(
+        res,
+        StatusCodes.CREATED,
+        responseMessage.SCHOOL_ADMIN_REGISTERED_SUCCESSFULLY_VER,
+        {
+          schoolEmail: newSchool.email,
+          adminEmail: newAdmin.email,
+        }
+      );
+    }
   } catch (error) {
     logger.error(error);
     return CatchErrorHandler(res, error);

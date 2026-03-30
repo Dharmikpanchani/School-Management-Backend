@@ -215,6 +215,7 @@ const commonImageValidation = (isRequired = true) => {
 };
 
 const schoolRegisterSchema = joi.object({
+  id: joistring.optional().allow(''),
   schoolName: joistring.required().label('School name'),
   ownerName: joistring.required().label('Owner name'),
   email: joistring.email().required().label('Email'),
@@ -243,7 +244,13 @@ const schoolRegisterSchema = joi.object({
   panNumber: joistring.optional().allow('').label('PAN Number'),
   latitude: joi.number().optional().allow(null, '').label('Latitude'),
   longitude: joi.number().optional().allow(null, '').label('Longitude'),
-  logo: commonImageValidation(true).label('Logo'),
+  logo: joi.any()
+    .when('id', {
+      is: joi.exist().not(''),
+      then: commonImageValidation(false),
+      otherwise: commonImageValidation(true),
+    })
+    .label('Logo'),
   banner: commonImageValidation(false).label('Banner'),
   affiliationCertificate: commonImageValidation(false).label(
     'Affiliation Certificate'
@@ -256,7 +263,11 @@ const schoolRegisterSchema = joi.object({
     .minOfNumeric(1)
     .minOfSpecialCharacters(1)
     .noWhiteSpaces()
-    .required()
+    .when('id', {
+      is: joi.exist().not(''),
+      then: joi.optional().allow('', null),
+      otherwise: joi.required(),
+    })
     .label('Password'),
 });
 
