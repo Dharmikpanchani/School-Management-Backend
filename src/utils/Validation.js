@@ -244,7 +244,8 @@ const schoolRegisterSchema = joi.object({
   panNumber: joistring.optional().allow('').label('PAN Number'),
   latitude: joi.number().optional().allow(null, '').label('Latitude'),
   longitude: joi.number().optional().allow(null, '').label('Longitude'),
-  logo: joi.any()
+  logo: joi
+    .any()
     .when('id', {
       is: joi.exist().not(''),
       then: commonImageValidation(false),

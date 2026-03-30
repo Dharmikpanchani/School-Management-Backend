@@ -48,7 +48,10 @@ export const schoolRegister = async (req, res) => {
 
     if (id) {
       // 📝 UPDATE FLOW
-      const existingSchool = await School.findOne({ _id: id, isDeleted: false });
+      const existingSchool = await School.findOne({
+        _id: id,
+        isDeleted: false,
+      });
       if (!existingSchool) {
         return ResponseHandler(
           res,
