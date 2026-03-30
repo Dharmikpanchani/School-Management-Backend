@@ -46,6 +46,8 @@ const fieldsArray = [
   { name: 'imageUrl', maxCount: 1 },
   { name: 'logoUrl', maxCount: 1 },
   { name: 'logo', maxCount: 1 },
+  { name: 'banner', maxCount: 1 },
+  { name: 'affiliationCertificate', maxCount: 1 },
   { name: 'videoUrl', maxCount: 1 },
   { name: 'pdfUrl', maxCount: 1 },
   { name: 'multipleImageUrl', maxCount: 10 },
@@ -93,6 +95,15 @@ export const MediaUpload = () => {
               break;
             case 'logoUrl':
               req.logoUrl = file.filename;
+              break;
+            case 'logo':
+              req.logo = file.filename;
+              break;
+            case 'banner':
+              req.banner = file.filename;
+              break;
+            case 'affiliationCertificate':
+              req.affiliationCertificate = file.filename;
               break;
             case 'videoUrl':
               req.videoUrl = file.filename;

@@ -215,7 +215,7 @@ const commonImageValidation = (isRequired = true) => {
 };
 
 const schoolRegisterSchema = joi.object({
-  schoolName: joistring.required().label('school name'),
+  schoolName: joistring.required().label('School name'),
   ownerName: joistring.required().label('Owner name'),
   email: joistring.email().required().label('Email'),
   phoneNumber: joistring.required().label('Phone number'),
@@ -224,22 +224,28 @@ const schoolRegisterSchema = joi.object({
   country: joistring.required().label('Country'),
   state: joistring.required().label('State'),
   city: joistring.required().label('City'),
-  zipCode: joistring.required().label('Pincode'),
+  zipCode: joistring.required().label('Zip Code'),
   board: joistring
-    .valid('CBSE', 'GSEB', 'ICSE', 'Other')
+    .valid('CBSE', 'GSEB', 'ICSE', 'IB', 'Other')
     .required()
     .label('Board'),
   schoolType: joistring
-    .valid(
-      'Primary',
-      'Secondary',
-      'Higher Secondary',
-      'Junior College',
-      'Other'
-    )
+    .valid('Private', 'Government', 'Trust', 'Other')
     .required()
     .label('School Type'),
+  medium: joistring
+    .valid('English', 'Gujarati', 'Hindi', 'Other')
+    .required()
+    .label('Medium'),
+  establishedYear: joistring.required().label('Established Year'),
+  registrationNumber: joistring.required().label('Registration Number'),
+  gstNumber: joistring.optional().allow('').label('GST Number'),
+  panNumber: joistring.optional().allow('').label('PAN Number'),
+  latitude: joi.number().optional().allow(null, '').label('Latitude'),
+  longitude: joi.number().optional().allow(null, '').label('Longitude'),
   logo: commonImageValidation(true).label('Logo'),
+  banner: commonImageValidation(false).label('Banner'),
+  affiliationCertificate: commonImageValidation(false).label('Affiliation Certificate'),
   password: joiPassword
     .string()
     .min(8)
@@ -266,7 +272,7 @@ const schoolResendOtpSchema = joi.object({
 });
 
 const schoolUpdateProfileSchema = joi.object({
-  schoolName: joistring.optional().label('school name'),
+  schoolName: joistring.optional().label('School name'),
   ownerName: joistring.optional().label('Owner name'),
   phoneNumber: joistring.optional().label('Phone number'),
   address: joistring.optional().allow('').label('Address'),
@@ -274,7 +280,18 @@ const schoolUpdateProfileSchema = joi.object({
   state: joistring.optional().allow('').label('State'),
   zipCode: joistring.optional().allow('').label('Zip Code'),
   country: joistring.optional().allow('').label('Country'),
+  board: joistring.optional().valid('CBSE', 'GSEB', 'ICSE', 'IB', 'Other').label('Board'),
+  schoolType: joistring.optional().valid('Private', 'Government', 'Trust', 'Other').label('School Type'),
+  medium: joistring.optional().valid('English', 'Gujarati', 'Hindi', 'Other').label('Medium'),
+  establishedYear: joistring.optional().label('Established Year'),
+  registrationNumber: joistring.optional().label('Registration Number'),
+  gstNumber: joistring.optional().allow('').label('GST Number'),
+  panNumber: joistring.optional().allow('').label('PAN Number'),
+  latitude: joi.number().optional().allow(null, '').label('Latitude'),
+  longitude: joi.number().optional().allow(null, '').label('Longitude'),
   logo: commonImageValidation(false).label('Logo'),
+  banner: commonImageValidation(false).label('Banner'),
+  affiliationCertificate: commonImageValidation(false).label('Affiliation Certificate'),
 });
 
 const adminVerifyRegistrationOtpSchema = joi.object({

@@ -36,6 +36,13 @@ export const schoolRegister = async (req, res) => {
       country,
       board,
       schoolType,
+      medium,
+      establishedYear,
+      registrationNumber,
+      gstNumber,
+      panNumber,
+      latitude,
+      longitude,
     } = req.body;
 
     // 1. Check if school exists
@@ -65,7 +72,6 @@ export const schoolRegister = async (req, res) => {
       );
     }
 
-    // 5. Create School
     const newSchool = await School.create({
       schoolName,
       ownerName,
@@ -81,7 +87,16 @@ export const schoolRegister = async (req, res) => {
       country,
       board,
       schoolType,
-      logo: req.files?.logo?.[0]?.filename || '',
+      medium,
+      establishedYear,
+      registrationNumber,
+      gstNumber,
+      panNumber,
+      latitude,
+      longitude,
+      logo: req.logo || '',
+      banner: req.banner || '',
+      affiliationCertificate: req.affiliationCertificate || '',
     });
 
     // ✅ 6. CREATE DEFAULT ADMIN
@@ -143,7 +158,18 @@ export const getProfile = async (req, res) => {
       state: school.state,
       zipCode: school.zipCode,
       country: school.country,
+      board: school.board,
+      schoolType: school.schoolType,
+      medium: school.medium,
+      establishedYear: school.establishedYear,
+      registrationNumber: school.registrationNumber,
+      gstNumber: school.gstNumber,
+      panNumber: school.panNumber,
+      latitude: school.latitude,
+      longitude: school.longitude,
       logo: school.logo,
+      banner: school.banner,
+      affiliationCertificate: school.affiliationCertificate,
       isActive: school.isActive,
     };
 
@@ -170,7 +196,18 @@ export const updateProfile = async (req, res) => {
       state,
       zipCode,
       country,
+      board,
+      schoolType,
+      medium,
+      establishedYear,
+      registrationNumber,
+      gstNumber,
+      panNumber,
+      latitude,
+      longitude,
       logo,
+      banner,
+      affiliationCertificate,
     } = req.body;
     const schoolId = req.school_id;
 
@@ -205,14 +242,25 @@ export const updateProfile = async (req, res) => {
     if (state !== undefined) school.state = state;
     if (zipCode !== undefined) school.zipCode = zipCode;
     if (country !== undefined) school.country = country;
+    if (board !== undefined) school.board = board;
+    if (schoolType !== undefined) school.schoolType = schoolType;
+    if (medium !== undefined) school.medium = medium;
+    if (establishedYear !== undefined) school.establishedYear = establishedYear;
+    if (registrationNumber !== undefined) school.registrationNumber = registrationNumber;
+    if (gstNumber !== undefined) school.gstNumber = gstNumber;
+    if (panNumber !== undefined) school.panNumber = panNumber;
+    if (latitude !== undefined) school.latitude = latitude;
+    if (longitude !== undefined) school.longitude = longitude;
 
-    // Check if the logo was sent as a file
-    if (req?.files?.logo?.length > 0) {
-      school.logo = req.files.logo[0]?.filename;
-    } else if (logo !== undefined) {
-      // Or fallback to plain text if directly sent
-      school.logo = logo;
-    }
+    // Handle File Uploads
+    if (req.logo) school.logo = req.logo;
+    else if (logo !== undefined) school.logo = logo;
+
+    if (req.banner) school.banner = req.banner;
+    else if (banner !== undefined) school.banner = banner;
+
+    if (req.affiliationCertificate) school.affiliationCertificate = req.affiliationCertificate;
+    else if (affiliationCertificate !== undefined) school.affiliationCertificate = affiliationCertificate;
 
     await school.save();
 
@@ -360,7 +408,18 @@ export const updateSchoolById = async (req, res) => {
       state,
       zipCode,
       country,
+      board,
+      schoolType,
+      medium,
+      establishedYear,
+      registrationNumber,
+      gstNumber,
+      panNumber,
+      latitude,
+      longitude,
       logo,
+      banner,
+      affiliationCertificate,
     } = req.body;
 
     // 1. Find school (correct way)
@@ -402,7 +461,25 @@ export const updateSchoolById = async (req, res) => {
     school.state = state ?? school.state;
     school.zipCode = zipCode ?? school.zipCode;
     school.country = country ?? school.country;
-    school.logo = logo ?? school.logo;
+    school.board = board ?? school.board;
+    school.schoolType = schoolType ?? school.schoolType;
+    school.medium = medium ?? school.medium;
+    school.establishedYear = establishedYear ?? school.establishedYear;
+    school.registrationNumber = registrationNumber ?? school.registrationNumber;
+    school.gstNumber = gstNumber ?? school.gstNumber;
+    school.panNumber = panNumber ?? school.panNumber;
+    school.latitude = latitude ?? school.latitude;
+    school.longitude = longitude ?? school.longitude;
+
+    // Handle File Uploads
+    if (req.logo) school.logo = req.logo;
+    else if (logo !== undefined) school.logo = logo;
+
+    if (req.banner) school.banner = req.banner;
+    else if (banner !== undefined) school.banner = banner;
+
+    if (req.affiliationCertificate) school.affiliationCertificate = req.affiliationCertificate;
+    else if (affiliationCertificate !== undefined) school.affiliationCertificate = affiliationCertificate;
 
     // 4. Save
     await school.save();

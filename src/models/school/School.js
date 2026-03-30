@@ -46,18 +46,53 @@ const SchoolSchema = new mongoose.Schema(
     },
     board: {
       type: String,
-      enum: ['CBSE', 'GSEB', 'ICSE', 'Other'],
+      enum: ['CBSE', 'GSEB', 'ICSE', 'IB', 'Other'],
       required: true,
     },
     schoolType: {
       type: String,
-      enum: [
-        `Primary`,
-        `Secondary`,
-        `Higher Secondary`,
-        `Junior College`,
-        `Other`,
-      ],
+      enum: ['Private', 'Government', 'Trust', 'Other'],
+      required: true,
+    },
+    medium: {
+      type: String,
+      enum: ['English', 'Gujarati', 'Hindi', 'Other'],
+      default: 'English',
+    },
+    establishedYear: {
+      type: String,
+      default: '',
+    },
+    registrationNumber: {
+      type: String,
+      default: '',
+    },
+    gstNumber: {
+      type: String,
+      default: '',
+    },
+    panNumber: {
+      type: String,
+      default: '',
+    },
+    latitude: {
+      type: Number,
+      default: null,
+    },
+    longitude: {
+      type: Number,
+      default: null,
+    },
+    banner: {
+      type: String,
+      default: '',
+    },
+    affiliationCertificate: {
+      type: String,
+      default: '',
+    },
+    password: {
+      type: String,
       required: true,
     },
     schoolCode: {
