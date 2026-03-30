@@ -237,7 +237,7 @@ const schoolRegisterSchema = joi.object({
     .valid('English', 'Gujarati', 'Hindi', 'Other')
     .required()
     .label('Medium'),
-  establishedYear: joistring.required().label('Established Year'),
+  establishedYear: joi.date().required().label('Established Year'),
   registrationNumber: joistring.required().label('Registration Number'),
   gstNumber: joistring.optional().allow('').label('GST Number'),
   panNumber: joistring.optional().allow('').label('PAN Number'),
@@ -294,7 +294,7 @@ const schoolUpdateProfileSchema = joi.object({
     .optional()
     .valid('English', 'Gujarati', 'Hindi', 'Other')
     .label('Medium'),
-  establishedYear: joistring.optional().label('Established Year'),
+  establishedYear: joi.date().optional().label('Established Year'),
   registrationNumber: joistring.optional().label('Registration Number'),
   gstNumber: joistring.optional().allow('').label('GST Number'),
   panNumber: joistring.optional().allow('').label('PAN Number'),

@@ -60,8 +60,8 @@ const SchoolSchema = new mongoose.Schema(
       default: 'English',
     },
     establishedYear: {
-      type: String,
-      default: '',
+      type: Date,
+      default: null,
     },
     registrationNumber: {
       type: String,
