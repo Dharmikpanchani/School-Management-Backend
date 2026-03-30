@@ -246,7 +246,8 @@ export const updateProfile = async (req, res) => {
     if (schoolType !== undefined) school.schoolType = schoolType;
     if (medium !== undefined) school.medium = medium;
     if (establishedYear !== undefined) school.establishedYear = establishedYear;
-    if (registrationNumber !== undefined) school.registrationNumber = registrationNumber;
+    if (registrationNumber !== undefined)
+      school.registrationNumber = registrationNumber;
     if (gstNumber !== undefined) school.gstNumber = gstNumber;
     if (panNumber !== undefined) school.panNumber = panNumber;
     if (latitude !== undefined) school.latitude = latitude;
@@ -259,8 +260,10 @@ export const updateProfile = async (req, res) => {
     if (req.banner) school.banner = req.banner;
     else if (banner !== undefined) school.banner = banner;
 
-    if (req.affiliationCertificate) school.affiliationCertificate = req.affiliationCertificate;
-    else if (affiliationCertificate !== undefined) school.affiliationCertificate = affiliationCertificate;
+    if (req.affiliationCertificate)
+      school.affiliationCertificate = req.affiliationCertificate;
+    else if (affiliationCertificate !== undefined)
+      school.affiliationCertificate = affiliationCertificate;
 
     await school.save();
 
@@ -478,8 +481,10 @@ export const updateSchoolById = async (req, res) => {
     if (req.banner) school.banner = req.banner;
     else if (banner !== undefined) school.banner = banner;
 
-    if (req.affiliationCertificate) school.affiliationCertificate = req.affiliationCertificate;
-    else if (affiliationCertificate !== undefined) school.affiliationCertificate = affiliationCertificate;
+    if (req.affiliationCertificate)
+      school.affiliationCertificate = req.affiliationCertificate;
+    else if (affiliationCertificate !== undefined)
+      school.affiliationCertificate = affiliationCertificate;
 
     // 4. Save
     await school.save();

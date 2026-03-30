@@ -245,7 +245,9 @@ const schoolRegisterSchema = joi.object({
   longitude: joi.number().optional().allow(null, '').label('Longitude'),
   logo: commonImageValidation(true).label('Logo'),
   banner: commonImageValidation(false).label('Banner'),
-  affiliationCertificate: commonImageValidation(false).label('Affiliation Certificate'),
+  affiliationCertificate: commonImageValidation(false).label(
+    'Affiliation Certificate'
+  ),
   password: joiPassword
     .string()
     .min(8)
@@ -280,9 +282,18 @@ const schoolUpdateProfileSchema = joi.object({
   state: joistring.optional().allow('').label('State'),
   zipCode: joistring.optional().allow('').label('Zip Code'),
   country: joistring.optional().allow('').label('Country'),
-  board: joistring.optional().valid('CBSE', 'GSEB', 'ICSE', 'IB', 'Other').label('Board'),
-  schoolType: joistring.optional().valid('Private', 'Government', 'Trust', 'Other').label('School Type'),
-  medium: joistring.optional().valid('English', 'Gujarati', 'Hindi', 'Other').label('Medium'),
+  board: joistring
+    .optional()
+    .valid('CBSE', 'GSEB', 'ICSE', 'IB', 'Other')
+    .label('Board'),
+  schoolType: joistring
+    .optional()
+    .valid('Private', 'Government', 'Trust', 'Other')
+    .label('School Type'),
+  medium: joistring
+    .optional()
+    .valid('English', 'Gujarati', 'Hindi', 'Other')
+    .label('Medium'),
   establishedYear: joistring.optional().label('Established Year'),
   registrationNumber: joistring.optional().label('Registration Number'),
   gstNumber: joistring.optional().allow('').label('GST Number'),
@@ -291,7 +302,9 @@ const schoolUpdateProfileSchema = joi.object({
   longitude: joi.number().optional().allow(null, '').label('Longitude'),
   logo: commonImageValidation(false).label('Logo'),
   banner: commonImageValidation(false).label('Banner'),
-  affiliationCertificate: commonImageValidation(false).label('Affiliation Certificate'),
+  affiliationCertificate: commonImageValidation(false).label(
+    'Affiliation Certificate'
+  ),
 });
 
 const adminVerifyRegistrationOtpSchema = joi.object({
